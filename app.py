@@ -1,10 +1,12 @@
 from flask import Flask
-from admin import init_admin_router
+from routers.admin import admin
+from routers.api import api
 
 app = Flask(__name__)
 
-init_admin_router('admin', app)
+app.register_blueprint(admin, url_prefix='/admin')
+app.register_blueprint(api, url_prefix='/api')
 
-@app.route("/<name>")
+@app.route("/<uuid:name>")
 def hello(name):
     return f"{name}"
