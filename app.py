@@ -1,7 +1,10 @@
 from flask import Flask
+from admin import init_admin_router
 
 app = Flask(__name__)
 
-@app.route("/")
-def hello():
-    return "Hello, World!"
+init_admin_router('admin', app)
+
+@app.route("/<name>")
+def hello(name):
+    return f"{name}"
