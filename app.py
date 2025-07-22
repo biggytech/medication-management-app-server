@@ -1,8 +1,37 @@
-from flask import Flask
+from flask import Flask, request
 from routers.admin import admin
 from routers.api import api
 
 app = Flask(__name__)
+
+# Useful debugging interceptor to log all values posted to the endpoint
+@app.before_request
+def before():
+    values = 'values: '
+    if len(request.values) == 0:
+        values += '(None)'
+    for key in request.values:
+        values += key + ': ' + request.values[key] + ', '
+    app.logger.debug(values)
+
+# Useful debugging interceptor to log all endpoint responses
+@app.after_request
+def after(response):
+    app.logger.debug('response: ' + response.status + ', ' + response.data.decode('utf-8'))
+    return response
+
+# Default handler for uncaught exceptions in the app
+@app.errorhandler(500)
+def internal_error(exception):
+    app.logger.error(exception)
+    return Flask.make_response('server error', 500)
+
+# Default handler for all bad requests sent to the app
+@app.errorhandler(400)
+def handle_bad_request(e):
+    app.logger.info('Bad request', e)
+    return Flask.make_response('bad request', 400)
+
 
 app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(api, url_prefix='/api')
