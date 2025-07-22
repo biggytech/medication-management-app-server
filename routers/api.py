@@ -2,6 +2,20 @@ from flask import Blueprint
 
 api = Blueprint('api', __name__)
 
-@api.route('/login')
+@api.post('/sign-up/default')
+def sign_up_default():
+    return {
+        "token": ':TODO'
+    }
+
+@api.post('/sign-up/offline')
+def sign_up_offline():
+    return {
+        "token": ':TODO'
+    }
+
+@api.post('/login')
 def login():
-    return "API - Login"
+    return {
+        "token": ':TODO'
+    }
