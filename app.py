@@ -1,6 +1,7 @@
 from flask import Flask, request
 from routers.admin import admin
 from routers.api import api
+import sqlalchemy
 
 app = Flask(__name__)
 
@@ -36,6 +37,6 @@ def handle_bad_request(e):
 app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(api, url_prefix='/api')
 
-@app.route("/<uuid:name>")
-def hello(name):
-    return f"{name}"
+@app.route("/testik")
+def hello():
+    return sqlalchemy.__version__

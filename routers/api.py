@@ -11,11 +11,13 @@ def sign_up_default():
 @api.post('/sign-up/offline')
 def sign_up_offline():
     return {
-        "token": ':TODO'
+        "token": ':TODO',
+        "userName": "Anonymous User"
     }
 
 @api.post('/login')
 def login():
     return {
-        "token": ':TODO'
+        "token": ':TODO',
+        "userName": ":TODO"
     }
