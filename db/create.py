@@ -1,8 +1,8 @@
 from connect import connect
 from models.base import Base
 
-def migrate(engine):
+def create_db(engine):
     Base.metadata.create_all(engine)
 
 engine = connect()
-migrate(engine)
+create_db(engine)
