@@ -4,3 +4,6 @@
 
 # Dependencies
 .venv
+
+# Environment
+.env

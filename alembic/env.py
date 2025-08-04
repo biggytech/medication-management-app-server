@@ -1,14 +1,10 @@
 from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
 
 from models.base import Base
-
-# TODO: env variable
-sqlalchemy_url = "postgresql+psycopg2://postgres:postgres@localhost:5432/medication_test"
+from db.constants import DB_CONNECTION_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -44,7 +40,7 @@ def run_migrations_offline() -> None:
 
     """
     # url = config.get_main_option("sqlalchemy.url")
-    url = sqlalchemy_url
+    url = DB_CONNECTION_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -67,7 +63,7 @@ def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        url=sqlalchemy_url
+        url=DB_CONNECTION_URL
     )
 
     with connectable.connect() as connection:
