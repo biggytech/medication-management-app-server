@@ -4,6 +4,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from models.base import Base
+from models.all import all_models # load all models so they update Base metadata
+
 from db.constants import DB_CONNECTION_URL
 
 # this is the Alembic Config object, which provides
