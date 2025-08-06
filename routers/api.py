@@ -12,10 +12,10 @@ def sign_up_default():
 
 @api.post('/sign-up/anonymous')
 def sign_up_offline():
-    create_user(full_name="Anonymous User", is_guest=True)
+    new_user = create_user(full_name="Anonymous User", is_guest=True)
     return {
         "token": ':TODO',
-        "userName": "Anonymous User"
+        "userName": new_user['full_name']
     }
 
 @api.post('/login')
