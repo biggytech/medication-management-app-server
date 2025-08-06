@@ -1,13 +1,12 @@
 from db.utils.with_session import with_session
 from models.user import User
 
-def create_user():
-    return with_session(__create_user)
+def create_user(**user_data):
+    return with_session(__create_user, **user_data)
 
-def __create_user(session):
+def __create_user(session, **user_data):
     new_user = User(
-        full_name="Spongebob Squarepants",
-        is_guest = True
+        **user_data
         # addresses=[Address(email_address="spongebob@sqlalchemy.org")],
     )
     # sandy = User(
