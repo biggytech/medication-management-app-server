@@ -1,10 +1,6 @@
-from db.utils.with_session import with_session
 from models.user import User
 
-def create_user(**user_data):
-    return with_session(__create_user, **user_data)
-
-def __create_user(session, **user_data):
+def create_user(session, **user_data):
     new_user = User(
         **user_data
         # addresses=[Address(email_address="spongebob@sqlalchemy.org")],
@@ -20,8 +16,5 @@ def __create_user(session, **user_data):
     # patrick = User(name="patrick", fullname="Patrick Star")
 
     session.add(new_user)
-    session.commit()
-
-    session.refresh(new_user)
 
     return new_user
