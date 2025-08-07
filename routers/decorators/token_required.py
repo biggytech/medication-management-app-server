@@ -11,6 +11,7 @@ load_dotenv()
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        # TODO: get from headers?
         token = request.cookies.get('jwt_token')
 
         if not token:

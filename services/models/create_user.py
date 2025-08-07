@@ -19,7 +19,9 @@ def __create_user(session, **user_data):
     # )
     # patrick = User(name="patrick", fullname="Patrick Star")
 
-    session.add_all([new_user])
+    session.add(new_user)
     session.commit()
 
-    return user_data
+    session.refresh(new_user)
+
+    return new_user

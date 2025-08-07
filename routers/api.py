@@ -1,6 +1,7 @@
 from flask import Blueprint
 
-from services.dal.create_user import create_user
+from services.auth.generate_token import generate_token
+from services.models.create_user import create_user
 
 api = Blueprint('api', __name__)
 
@@ -13,9 +14,10 @@ def sign_up_default():
 @api.post('/sign-up/anonymous')
 def sign_up_offline():
     new_user = create_user(full_name="Anonymous User", is_guest=True)
+    token = generate_token(new_user)
     return {
-        "token": ':TODO',
-        "userName": new_user['full_name']
+        "token": token,
+        "userName": new_user.full_name
     }
 
 @api.post('/login')
