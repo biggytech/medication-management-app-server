@@ -22,6 +22,7 @@ def __sign_up_offline(session):
     session.refresh(new_user)
 
     return {
+        "id": new_user.id,
         "token": token,
-        "userName": new_user.full_name
+        "full_name": new_user.full_name
     }
