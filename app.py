@@ -6,6 +6,7 @@ from routers.api.sign_up.default import api_sign_up_default
 import sqlalchemy
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 # Useful debugging interceptor to log all values posted to the endpoint
 @app.before_request
