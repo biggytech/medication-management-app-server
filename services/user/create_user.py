@@ -2,8 +2,12 @@ from services.auth.generate_token import generate_token
 from uuid import uuid4
 from models.user import User
 from werkzeug.security import generate_password_hash, check_password_hash
+from db.utils.with_session import with_session
 
-def create_user(session, **user_data):
+def create_user(**user_data):
+    return with_session(__create_user, **user_data)
+
+def __create_user(session, **user_data):
     # TODO: validate user_data
 
     # TODO: check existing user

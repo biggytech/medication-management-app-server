@@ -16,14 +16,14 @@ def token_required(f):
 
         if not token:
             # TODO: translate
-            return jsonify({'message': 'Token is missing!'}), 401
+            return jsonify({'error': 'Token is missing!'}), 401
 
         try:
             data = jwt.decode(token, os.environ['JWT_SECRET_KEY'], algorithms=["HS256"])
             current_user = User.query.filter_by(uuid=data['uuid']).first()
         except:
             # TODO: translate
-            return jsonify({'message': 'Token is invalid!'}), 401
+            return jsonify({'error': 'Token is invalid!'}), 401
 
         return f(current_user, *args, **kwargs)
 

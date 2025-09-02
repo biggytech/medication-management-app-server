@@ -7,4 +7,4 @@ api_sign_up_anonymous = Blueprint('/api/sign-up/anonymous', __name__)
 
 @api_sign_up_anonymous.post('/')
 def sign_up_offline():
-    return with_session(create_anonymous_user)
+    return create_anonymous_user()
