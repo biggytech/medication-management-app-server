@@ -8,7 +8,7 @@ api_sign_in_default = Blueprint('/api/sign-in/default', __name__)
 
 @api_sign_in_default.post('/')
 def login():
-    # TODO: validate user data
+    # TODO: validate user data - fields json/existence only
     user_data = request.json
 
     user = get_user_by_email(user_data['email'])
