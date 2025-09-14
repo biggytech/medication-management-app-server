@@ -8,8 +8,6 @@ def create_user(**user_data):
     return with_session(__create_user, **user_data)
 
 def __create_user(session, **user_data):
-    # TODO: validate user_data
-
     # TODO: check existing user
     # existing_user = User.query.filter_by(email=user_data['email']).first()
     # if existing_user:

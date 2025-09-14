@@ -1,4 +1,4 @@
-from pydantic import BaseModel, PositiveInt, ValidationError, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr
 
 class SignInDefaultValidation(BaseModel):
     email: EmailStr
