@@ -10,7 +10,7 @@ api_medicines_add = Blueprint('/api/medicines/add', __name__)
 @api_medicines_add.post('/')
 @validate_request(BODY, CreateMedicineValidation)
 @token_required
-def medicines_add():
+def medicines_add(user):
     medicine_data = request.json
 
     return create_medicine(**medicine_data)
