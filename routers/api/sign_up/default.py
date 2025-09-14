@@ -1,10 +1,13 @@
 from flask import Blueprint, request
 
+from models.user.validations import CreateUserValidation
+from services.routers.decorators.validate_request import validate_request, BODY
 from services.user.create_user import create_user
 
 api_sign_up_default = Blueprint('/api/sign-up/default', __name__)
 
 @api_sign_up_default.post('/')
+@validate_request(BODY, CreateUserValidation)
 def sign_up_default():
     user_data = request.json
 

@@ -1,7 +1,7 @@
 from services.auth.generate_token import generate_token
 from uuid import uuid4
-from models.user import User
-from werkzeug.security import generate_password_hash, check_password_hash
+from models.user.user import User
+from werkzeug.security import generate_password_hash
 from db.utils.with_session import with_session
 
 def create_user(**user_data):

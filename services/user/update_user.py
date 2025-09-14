@@ -1,9 +1,6 @@
-from sqlalchemy import select
-
 from services.auth.generate_token import generate_token
-from uuid import uuid4
-from models.user import User
-from werkzeug.security import generate_password_hash, check_password_hash
+from models.user.user import User
+from werkzeug.security import generate_password_hash
 from db.utils.with_session import with_session
 from services.user.get_user_by_id import get_user_by_id
 

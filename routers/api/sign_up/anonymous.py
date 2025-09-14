@@ -14,6 +14,7 @@ def sign_up_anonymous():
 @api_sign_up_anonymous.post('/finish')
 @token_required
 def sign_up_anonymous_finish(user):
+    # TODO: validate user data
     user_data = request.json
 
     user_data['is_guest'] = False

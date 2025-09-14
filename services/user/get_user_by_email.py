@@ -1,5 +1,5 @@
 from db.utils.with_session import with_session
-from models.user import User
+from models.user.user import User
 from sqlalchemy import select
 
 def get_user_by_email(email):
