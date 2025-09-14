@@ -1,18 +1,19 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash
 
+from models.user.validations import SignInDefaultValidation
 from services.auth.generate_token import generate_token
+from services.routers.decorators.validate_request import BODY, validate_request
 from services.user.get_user_by_email import get_user_by_email
 
 api_sign_in_default = Blueprint('/api/sign-in/default', __name__)
 
 @api_sign_in_default.post('/')
+@validate_request(BODY, SignInDefaultValidation)
 def login():
-    # TODO: validate user data - fields json/existence only
     user_data = request.json
 
     user = get_user_by_email(user_data['email'])
-    print('user.full_name', user.full_name)
 
     if not user or not check_password_hash(user.password, user_data['password']):
         # TODO: translate
