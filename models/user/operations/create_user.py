@@ -2,12 +2,11 @@ from services.auth.generate_token import generate_token
 from uuid import uuid4
 from models.user.user import User
 from werkzeug.security import generate_password_hash
-from db.utils.with_session import with_session
 
-def create_user(**user_data):
-    return with_session(__create_user, **user_data)
+from services.db.decorators.with_session import with_session
 
-def __create_user(session, **user_data):
+@with_session
+def create_user(session, **user_data):
     # TODO: check existing user
     # existing_user = User.query.filter_by(email=user_data['email']).first()
     # if existing_user:
@@ -21,23 +20,9 @@ def __create_user(session, **user_data):
     new_user = User(
         uuid=uuid,
         **user_data
-        # full_name="Anonymous User",
-        # is_guest=True,
-        # password=get_random_password(),
-        # email=get_random_email()
         # addresses=[Address(email_address="spongebob@sqlalchemy.org")],
     )
     session.add(new_user)
-
-    # sandy = User(
-    #     name="sandy",
-    #     fullname="Sandy Cheeks",
-    #     addresses=[
-    #         Address(email_address="sandy@sqlalchemy.org"),
-    #         Address(email_address="sandy@squirrelpower.org"),
-    #     ],
-    # )
-    # patrick = User(name="patrick", fullname="Patrick Star")
 
     token = generate_token(new_user)
 

@@ -1,14 +1,11 @@
 from services.auth.generate_token import generate_token
 from models.user.user import User
 from werkzeug.security import generate_password_hash
-from db.utils.with_session import with_session
 from models.user.operations.get_user_by_id import get_user_by_id
+from services.db.decorators.with_session import with_session
 
-
-def update_user(user, **user_data):
-    return with_session(__update_user, user, **user_data)
-
-def __update_user(session, user, **user_data):
+@with_session
+def update_user(session, user, **user_data):
     # TODO: validate user_data
 
     # TODO: check existing user

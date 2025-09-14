@@ -1,11 +1,10 @@
 from models.user.user import User
-from db.utils.with_session import with_session
 from sqlalchemy import delete
 
-def delete_user(user):
-    return with_session(__delete_user, user)
+from services.db.decorators.with_session import with_session
 
-def __delete_user(session, user):
+@with_session
+def delete_user(session, user):
     # TODO: check existing user
     # existing_user = User.query.filter_by(email=user_data['email']).first()
     # if existing_user:
