@@ -4,7 +4,7 @@ import jwt
 import os
 from dotenv import load_dotenv
 
-from services.user.get_user_by_uuid import get_user_by_uuid
+from models.user.operations.get_user_by_uuid import get_user_by_uuid
 
 load_dotenv()
 

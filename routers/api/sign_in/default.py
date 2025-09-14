@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 from models.user.validations import SignInDefaultValidation
 from services.auth.generate_token import generate_token
 from services.routers.decorators.validate_request import BODY, validate_request
-from services.user.get_user_by_email import get_user_by_email
+from models.user.operations.get_user_by_email import get_user_by_email
 
 api_sign_in_default = Blueprint('/api/sign-in/default', __name__)
 

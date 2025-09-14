@@ -2,7 +2,7 @@ from services.auth.generate_token import generate_token
 from models.user.user import User
 from werkzeug.security import generate_password_hash
 from db.utils.with_session import with_session
-from services.user.get_user_by_id import get_user_by_id
+from models.user.operations.get_user_by_id import get_user_by_id
 
 
 def update_user(user, **user_data):
