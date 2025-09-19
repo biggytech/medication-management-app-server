@@ -1,6 +1,7 @@
 from flask import Flask, request
 from routers.admin import admin
 from routers.api.medicines.add import api_medicines_add
+from routers.api.medicines.list import api_medicines_list
 from  routers.api.sign_in.default import api_sign_in_default
 from routers.api.sign_out.anonymous import api_sign_out_anonymous
 from routers.api.sign_up.anonymous import api_sign_up_anonymous
@@ -45,6 +46,7 @@ app.register_blueprint(api_sign_up_anonymous, url_prefix='/api/sign-up/anonymous
 app.register_blueprint(api_sign_up_default, url_prefix='/api/sign-up/default')
 app.register_blueprint(api_sign_out_anonymous, url_prefix='/api/sign-out/anonymous')
 app.register_blueprint(api_medicines_add, url_prefix='/api/medicines/add')
+app.register_blueprint(api_medicines_list, url_prefix='/api/medicines/list')
 
 @app.route("/testik")
 def hello():

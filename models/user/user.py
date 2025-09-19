@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from sqlalchemy import text
 from sqlalchemy import String
 from sqlalchemy import Boolean
@@ -6,6 +7,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from models.base import Base
 
+@dataclass
 class User(Base):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
