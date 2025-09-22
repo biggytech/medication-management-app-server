@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from sqlalchemy import String, Column
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.orm import mapped_column
 from models.base import Base
 import enum
 from sqlalchemy.dialects.postgresql import ENUM as pgEnum
+
+from models.medicine_setting.medicine_setting import MedicineSetting
 
 class MedicineForms(str, enum.Enum):
     tablet = "tablet"
@@ -25,9 +27,12 @@ MedicineFormsType: pgEnum = pgEnum(
 
 @dataclass
 class Medicine(Base):
-    __tablename__ = "medicine"
+    # TODO: add user mapping
+    __tablename__ = "medicines"
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
     form = mapped_column(MedicineFormsType, nullable=False)
+    # settings: Mapped["MedicineSetting"] = relationship(back_populates="medicine")
+    settings: Mapped["MedicineSetting"] = relationship()
     def __repr__(self) -> str:
         return f"Medicine(id={self.id!r}, title={self.title!r})"

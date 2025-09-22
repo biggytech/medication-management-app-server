@@ -1,5 +1,4 @@
-from connect import connect
-
+from db.connect import connect
 from models.base import Base
 from models.all import all_models # load all models so they update Base metadata
 

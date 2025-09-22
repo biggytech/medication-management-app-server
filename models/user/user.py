@@ -9,7 +9,7 @@ from models.base import Base
 
 @dataclass
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
     uuid = mapped_column(UUID(as_uuid=True), unique=True, server_default=text("gen_random_uuid()"))
     full_name: Mapped[str] = mapped_column(String(255))
