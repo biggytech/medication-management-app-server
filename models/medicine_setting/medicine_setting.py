@@ -1,5 +1,6 @@
+import datetime
 from dataclasses import dataclass
-from sqlalchemy import String, Column, ForeignKey
+from sqlalchemy import String, Column, ForeignKey, DateTime, TIMESTAMP
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.orm import mapped_column
 from models.base import Base
@@ -14,5 +15,6 @@ class MedicineSetting(Base):
     medicine_id: Mapped[int] = mapped_column(ForeignKey("medicines.id"))
     # medicine: Mapped["Medicine"] = relationship(back_populates="settings")
     dose: Mapped[int] = mapped_column(CheckConstraint("dose >= 1 and dose <= 100"))
+    end_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     def __repr__(self) -> str:
         return f"Medicine(id={self.id!r}, title={self.title!r})"
