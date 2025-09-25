@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 
-from models.medicine_setting.validations import CreateMedicineSettingValidation
+from models.medicine_schedule.validations import CreateMedicineScheduleValidation
 
 class CreateMedicineValidation(BaseModel):
-    # TODO: validate medicine form
     title: str = Field(min_length=1, max_length=255)
-    setting: CreateMedicineSettingValidation
+    form: str = Field() # TODO: validate medicine form as enum
+    schedule: CreateMedicineScheduleValidation

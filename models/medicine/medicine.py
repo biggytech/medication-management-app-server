@@ -6,7 +6,7 @@ from models.base import Base
 import enum
 from sqlalchemy.dialects.postgresql import ENUM as pgEnum
 
-from models.medicine_setting.medicine_setting import MedicineSetting
+from models.medicine_schedule.medicine_schedule import MedicineSchedule
 
 class MedicineForms(str, enum.Enum):
     tablet = "tablet"
@@ -32,7 +32,6 @@ class Medicine(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
     form = mapped_column(MedicineFormsType, nullable=False)
-    # settings: Mapped["MedicineSetting"] = relationship(back_populates="medicine")
-    settings: Mapped["MedicineSetting"] = relationship()
+    schedule: Mapped["MedicineSchedule"] = relationship()
     def __repr__(self) -> str:
         return f"Medicine(id={self.id!r}, title={self.title!r})"

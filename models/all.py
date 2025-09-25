@@ -1,5 +1,5 @@
 from models.medicine.medicine import Medicine
-from models.medicine_setting.medicine_setting import MedicineSetting
+from models.medicine_schedule.medicine_schedule import MedicineSchedule
 from models.user.user import User
 
-all_models = [ User, Medicine, MedicineSetting ]
+all_models = [ User, Medicine, MedicineSchedule ]
