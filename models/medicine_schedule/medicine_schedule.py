@@ -31,11 +31,11 @@ class MedicineSchedule(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     medicine_id: Mapped[int] = mapped_column(ForeignKey("medicines.id"))
     type = mapped_column(MedicineScheduleTypesType, nullable=False)
-    is_only_as_needed: Mapped[bool] = mapped_column(Boolean())
     every_x_days: Mapped[int] = mapped_column(CheckConstraint("every_x_days >= 0 and every_x_days <= 365")) # 0 for "Only as needed"
     notification_times = mapped_column(JSONB) # 'HH:MM' format, empty for "Only as needed", for "Every Day" its length 1-12, for other options - its length is 1
     user_time_zone: Mapped[str] = mapped_column(String(255)) # needed for notification times handling
     next_dose_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=True)  # manually set date with time set to 0, null for options that do not support manually set date
+    days_of_week = mapped_column(JSONB)
     dose: Mapped[int] = mapped_column(CheckConstraint("dose >= 1 and dose <= 100"))
     end_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     def __repr__(self) -> str:
