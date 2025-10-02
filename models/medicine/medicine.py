@@ -33,5 +33,6 @@ class Medicine(Base):
     title: Mapped[str] = mapped_column(String(255))
     form = mapped_column(MedicineFormsType, nullable=False)
     schedule: Mapped["MedicineSchedule"] = relationship()
+    notes: Mapped[str] = mapped_column(String(255), nullable=True)
     def __repr__(self) -> str:
         return f"Medicine(id={self.id!r}, title={self.title!r})"
