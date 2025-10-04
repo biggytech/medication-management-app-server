@@ -8,4 +8,4 @@ api_medicines_list = Blueprint('/api/medicines/list', __name__)
 @api_medicines_list.get('/')
 @token_required
 def medicines_add(user):
-    return get_medicines()
+    return get_medicines(user.id)

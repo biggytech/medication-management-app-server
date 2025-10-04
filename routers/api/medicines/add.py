@@ -12,5 +12,6 @@ api_medicines_add = Blueprint('/api/medicines/add', __name__)
 @token_required
 def medicines_add(user):
     medicine_data = request.json
+    medicine_data.user_id = user.id
 
     return create_medicine(**medicine_data)
