@@ -11,7 +11,7 @@ from models.base import Base
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    uuid = mapped_column(UUID(as_uuid=True), unique=True, server_default=text("gen_random_uuid()"))
+    uuid: Mapped[str] = mapped_column(UUID(as_uuid=True), unique=True, server_default=text("gen_random_uuid()"))
     full_name: Mapped[str] = mapped_column(String(255))
     is_guest: Mapped[bool] = mapped_column(Boolean())
     password: Mapped[str] = mapped_column(String(255))

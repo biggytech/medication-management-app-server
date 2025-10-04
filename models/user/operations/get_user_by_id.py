@@ -4,7 +4,7 @@ from sqlalchemy import select
 from services.db.decorators.with_session import with_session
 
 @with_session
-def get_user_by_id(session, id):
-    stmt = select(User).where(User.id.in_([id]))
+def get_user_by_id(session, user_id):
+    stmt = select(User).where(User.id.in_([user_id]))
     user = session.scalars(stmt).first()
     return user

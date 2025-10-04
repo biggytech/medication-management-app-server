@@ -27,12 +27,11 @@ MedicineFormsType: pgEnum = pgEnum(
 
 @dataclass
 class Medicine(Base):
-    # TODO: add user mapping
     __tablename__ = "medicines"
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    form = mapped_column(MedicineFormsType, nullable=False)
+    form: Mapped[str] = mapped_column(MedicineFormsType, nullable=False)
     schedule: Mapped["MedicineSchedule"] = relationship()
     notes: Mapped[str] = mapped_column(String(255), nullable=True)
     def __repr__(self) -> str:
