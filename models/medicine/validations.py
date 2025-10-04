@@ -2,10 +2,11 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from models.medicine_schedule.validations import CreateMedicineScheduleValidation
+from models.medicine_schedule.validations import CreateOrUpdateMedicineScheduleValidation
 
-class CreateMedicineValidation(BaseModel):
+
+class CreateOrUpdateMedicineValidation(BaseModel):
     title: str = Field(min_length=1, max_length=255)
-    form: str = Field() # TODO: validate medicine form as enum
-    schedule: CreateMedicineScheduleValidation
+    form: str = Field()  # TODO: validate medicine form as enum
+    schedule: CreateOrUpdateMedicineScheduleValidation
     notes: Optional[str] = Field(min_length=1, max_length=255, default=None)

@@ -6,8 +6,6 @@ from services.db.decorators.with_session import with_session
 
 @with_session
 def update_user(session, user, **user_data):
-    # TODO: validate user_data
-
     # TODO: check existing user
     # existing_user = User.query.filter_by(email=user_data['email']).first()
     # if existing_user:
