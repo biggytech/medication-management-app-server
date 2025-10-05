@@ -9,4 +9,4 @@ class CreateOrUpdateMedicineValidation(BaseModel):
     title: str = Field(min_length=1, max_length=255)
     form: str = Field()  # TODO: validate medicine form as enum
     schedule: CreateOrUpdateMedicineScheduleValidation
-    notes: Optional[str] = Field(min_length=1, max_length=255, default=None)
+    notes: Optional[str] = Field(min_length=0, max_length=255, default=None)
