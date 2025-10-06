@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from models.medicine.operations.create_medicine import create_medicine
 from models.medicine.operations.get_medicine_by_id import get_medicine_by_id
 from models.medicine.operations.get_medicines import get_medicines
+from models.medicine.operations.get_medicines_by_date import get_medicines_by_date
 from models.medicine.operations.update_medicine import update_medicine
 from models.medicine.validations import CreateOrUpdateMedicineValidation
 from services.routers.decorators.token_required import token_required
@@ -15,6 +16,13 @@ api_medicines = Blueprint('/api/medicines', __name__)
 @token_required
 def api_medicines_list(user):
     return get_medicines(user.id)
+
+
+@api_medicines.get('/list/by-date/<string:utc_date>')
+@token_required
+def api_medicines_list_by_date(user, utc_date):
+    # TODO: validate utc_date
+    return get_medicines_by_date(user.id, utc_date)
 
 
 @api_medicines.post('/add')
