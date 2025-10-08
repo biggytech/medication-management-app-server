@@ -21,8 +21,9 @@ def api_medicines_list(user):
 @api_medicines.get('/list/by-date/<string:utc_date>')
 @token_required
 def api_medicines_list_by_date(user, utc_date):
-    # TODO: validate utc_date
-    return get_medicines_by_date(user.id, utc_date)
+    # TODO: validate utc_date_time
+    timezone = request.args.get('timezone')
+    return get_medicines_by_date(user.id, utc_date, timezone)
 
 
 @api_medicines.post('/add')
@@ -32,7 +33,7 @@ def api_medicines_add(user):
     medicine_data = request.json
     medicine_data['user_id'] = user.id
 
-    return create_medicine(**medicine_data)
+    return jsonify(create_medicine(**medicine_data))
 
 
 @api_medicines.get('/<int:medicine_id>')
