@@ -9,9 +9,9 @@ from services.db.decorators.with_session import with_session
 def get_medicines_by_date(session, user_id, utc_date, timezone):
     date_filter = text(
         """
-        to_char(next_dose_date at time zone '%s', 'YYYY-MM-DD') <= '%s'
+        (to_char(next_dose_date at time zone '%s', 'YYYY-MM-DD') <= '%s'
             OR
-        (end_date IS NOT NULL AND to_char(end_date at time zone '%s', 'YYYY-MM-DD') = '%s')
+        (end_date IS NOT NULL AND to_char(end_date at time zone '%s', 'YYYY-MM-DD') = '%s'))
         """ % (timezone, utc_date, timezone, utc_date))
 
     stmt = (select(Medicine)
