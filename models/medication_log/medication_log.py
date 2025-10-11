@@ -4,10 +4,11 @@ from dataclasses import dataclass
 
 from sqlalchemy import ForeignKey, TIMESTAMP
 from sqlalchemy.dialects.postgresql import ENUM as pgEnum
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.orm import mapped_column
 
 from models.base import Base
+from models.medicine.medicine import Medicine
 
 
 class MedicationLogTypes(str, enum.Enum):
@@ -31,6 +32,7 @@ class MedicationLog(Base):
     type: Mapped[str] = mapped_column(MedicationLogTypesType, nullable=False)
     medicine_id: Mapped[int] = mapped_column(ForeignKey("medicines.id"))
     date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
+    medicine: Mapped["Medicine"] = relationship()
 
     def __repr__(self) -> str:
-        return f"Medication Log(id={self.id!r}, date={self.date!r})"
+        return f"Medication Log(id={self.id!r}, type={self.type!r}, date={self.date!r})"
