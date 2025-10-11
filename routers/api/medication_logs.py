@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from models.medication_log.medication_log import MedicationLogTypes
 from models.medication_log.operations.create_medication_log import create_medication_log
 from models.medication_log.operations.get_medication_logs_by_date import get_medication_logs_by_date
-from models.medication_log.validations import TakeMedicationLogValidation
+from models.medication_log.validations import TakeMedicationLogValidation, SkipMedicationLogValidation
 from services.routers.decorators.token_required import token_required
 from services.routers.decorators.validate_request import validate_request, BODY
 
@@ -18,6 +18,18 @@ def api_medication_logs_take(user, medicine_id):
     medication_log_data = request.json
     medication_log_data['medicine_id'] = medicine_id
     medication_log_data['type'] = MedicationLogTypes.taken
+
+    return jsonify(create_medication_log(**medication_log_data))
+
+
+@api_medication_logs.post('/<int:medicine_id>/skip')
+@validate_request(BODY, SkipMedicationLogValidation)
+@token_required
+def api_medication_logs_skip(user, medicine_id):
+    # TODO: validate medicine belongs to user
+    medication_log_data = request.json
+    medication_log_data['medicine_id'] = medicine_id
+    medication_log_data['type'] = MedicationLogTypes.skipped
 
     return jsonify(create_medication_log(**medication_log_data))
 
