@@ -1,13 +1,16 @@
 from flask import Flask, request
+
 from routers.admin import admin
+from routers.api.medication_logs import api_medication_logs
 from routers.api.medicines import api_medicines
-from  routers.api.sign_in.default import api_sign_in_default
+from routers.api.sign_in.default import api_sign_in_default
 from routers.api.sign_out.anonymous import api_sign_out_anonymous
 from routers.api.sign_up.anonymous import api_sign_up_anonymous
 from routers.api.sign_up.default import api_sign_up_default
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+
 
 # Useful debugging interceptor to log all values posted to the endpoint
 @app.before_request
@@ -19,17 +22,20 @@ def before():
         values += key + ': ' + request.values[key] + ', '
     app.logger.debug(values)
 
+
 # Useful debugging interceptor to log all endpoint responses
 @app.after_request
 def after(response):
     app.logger.debug('response: ' + response.status + ', ' + response.data.decode('utf-8'))
     return response
 
+
 # Default handler for uncaught exceptions in the app
 @app.errorhandler(500)
 def internal_error(exception):
     app.logger.error(exception)
     return Flask.make_response('server error', 500)
+
 
 # Default handler for all bad requests sent to the app
 @app.errorhandler(400)
@@ -44,3 +50,4 @@ app.register_blueprint(api_sign_up_anonymous, url_prefix='/api/sign-up/anonymous
 app.register_blueprint(api_sign_up_default, url_prefix='/api/sign-up/default')
 app.register_blueprint(api_sign_out_anonymous, url_prefix='/api/sign-out/anonymous')
 app.register_blueprint(api_medicines, url_prefix='/api/medicines')
+app.register_blueprint(api_medication_logs, url_prefix='/api/medication-logs')
