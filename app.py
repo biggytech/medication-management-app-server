@@ -1,6 +1,7 @@
 from flask import Flask, request
 
 from routers.admin import admin
+from routers.api.health_trackers import api_health_trackers
 from routers.api.medication_logs import api_medication_logs
 from routers.api.medicines import api_medicines
 from routers.api.sign_in.default import api_sign_in_default
@@ -51,3 +52,4 @@ app.register_blueprint(api_sign_up_default, url_prefix='/api/sign-up/default')
 app.register_blueprint(api_sign_out_anonymous, url_prefix='/api/sign-out/anonymous')
 app.register_blueprint(api_medicines, url_prefix='/api/medicines')
 app.register_blueprint(api_medication_logs, url_prefix='/api/medication-logs')
+app.register_blueprint(api_health_trackers, url_prefix='/api/health-trackers')
