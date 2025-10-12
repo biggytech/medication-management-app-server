@@ -1,3 +1,4 @@
+from models.doctor.doctor import Doctor
 from models.health_tracker.health_tracker import HealthTracker
 from models.health_tracker_log.health_tracker_log import HealthTrackerLog
 from models.health_tracker_schedule.health_tracker_schedule import HealthTrackerSchedule
@@ -6,4 +7,4 @@ from models.medicine.medicine import Medicine
 from models.medicine_schedule.medicine_schedule import MedicineSchedule
 from models.user.user import User
 
-all_models = [User, Medicine, MedicineSchedule, MedicationLog, HealthTracker, HealthTrackerSchedule, HealthTrackerLog]
+all_models = [User, Medicine, MedicineSchedule, MedicationLog, HealthTracker, HealthTrackerSchedule, HealthTrackerLog, Doctor]
