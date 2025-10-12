@@ -23,6 +23,7 @@ def get_medicines_by_date(session, user_id, utc_date, timezone):
 
     stmt = (select(Medicine)
             .order_by(text('next_dose_date')).where(Medicine.user_id.in_([user_id]))
+            .where(Medicine.deleted_date == None)
             .filter(date_filter)
             .options(joinedload('*'))
             )

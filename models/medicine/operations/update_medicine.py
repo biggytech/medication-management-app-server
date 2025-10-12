@@ -13,8 +13,6 @@ def update_medicine(session, medicine, **medicine_data):
     # if existing_user:
     #     return jsonify({'message': 'User already exists. Please login.'}), 400
 
-    print('MED DATA!')
-    print(medicine_data)
     medicine_schedule = medicine_data.pop('schedule')
 
     session.query(Medicine).filter(Medicine.id == medicine.id).update(medicine_data)

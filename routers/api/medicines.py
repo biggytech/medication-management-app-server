@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from models.medicine.operations.create_medicine import create_medicine
+from models.medicine.operations.delete_medicine_by_id import delete_medicine_by_id
 from models.medicine.operations.get_medicine_by_id import get_medicine_by_id
 from models.medicine.operations.get_medicines import get_medicines
 from models.medicine.operations.get_medicines_by_date import get_medicines_by_date
@@ -52,3 +53,10 @@ def api_medicines_put(user, medicine_id):
     medicine = get_medicine_by_id(medicine_id)
 
     return jsonify(update_medicine(medicine=medicine, **medicine_data))
+
+
+@api_medicines.delete('/<int:medicine_id>')
+@token_required
+def api_medicines_delete(user, medicine_id):
+    # TODO: validate medicine belongs to user
+    return jsonify(delete_medicine_by_id(medicine_id))
