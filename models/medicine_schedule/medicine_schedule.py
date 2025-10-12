@@ -39,7 +39,7 @@ class MedicineSchedule(Base):
     notification_times: Mapped[list[str]] = mapped_column(
         JSONB)  # 'HH:MM' format, empty for "Only as needed", for "Every Day" its length 1-12, for other options - its length is 1
     user_time_zone: Mapped[str] = mapped_column(String(255))  # needed for notification times handling
-    next_dose_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
+    next_take_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                               nullable=True)  # null for "Only as needed"
     days_of_week: Mapped[list[int]] = mapped_column(JSONB)
     dose: Mapped[int] = mapped_column(CheckConstraint("dose >= 1 and dose <= 100"))

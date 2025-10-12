@@ -10,7 +10,7 @@ class CreateOrUpdateMedicineScheduleValidation(BaseModel):
     every_x_days: int = Field(ge=0, le=365)
     # notification_times
     user_time_zone: str = Field(min_length=1, max_length=255)
-    next_dose_date: Optional[DateTime] = Field(default=None)  # TODO: add greater than today midnight validation
+    next_take_date: Optional[DateTime] = Field(default=None)  # TODO: add greater than today midnight validation
     # days_of_week
     dose: int = Field(ge=1, le=100)
     end_date: Optional[DateTime] = Field(default=None)  # TODO: add greater than today midnight validation

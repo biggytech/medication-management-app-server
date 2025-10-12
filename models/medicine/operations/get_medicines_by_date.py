@@ -11,7 +11,7 @@ def get_medicines_by_date(session, user_id, utc_date, timezone):
         """
         (
             (
-                to_char(next_dose_date at time zone '%s', 'YYYY-MM-DD') <= '%s'
+                to_char(next_take_date at time zone '%s', 'YYYY-MM-DD') <= '%s'
                 AND (
                     end_date IS NULL OR to_char(end_date at time zone '%s', 'YYYY-MM-DD') >= '%s'
                 )
@@ -22,7 +22,7 @@ def get_medicines_by_date(session, user_id, utc_date, timezone):
         """ % (timezone, utc_date, timezone, utc_date, timezone, utc_date))
 
     stmt = (select(Medicine)
-            .order_by(text('next_dose_date')).where(Medicine.user_id.in_([user_id]))
+            .order_by(text('next_take_date')).where(Medicine.user_id.in_([user_id]))
             .where(Medicine.deleted_date == None)
             .filter(date_filter)
             .options(joinedload('*'))
