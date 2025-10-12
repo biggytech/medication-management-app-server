@@ -15,8 +15,8 @@ class HealthTrackerLog(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     health_tracker_id: Mapped[int] = mapped_column(ForeignKey("health_trackers.id"))
     date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
-    value_1: Mapped[float] = mapped_column(nullable=False)
-    value_2: Mapped[float] = mapped_column(nullable=True)
+    value1: Mapped[float] = mapped_column(nullable=False)
+    value2: Mapped[float] = mapped_column(nullable=True)
     health_tracker: Mapped["HealthTracker"] = relationship()
 
     def __repr__(self) -> str:
