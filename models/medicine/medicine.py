@@ -40,6 +40,7 @@ class Medicine(Base):
     schedule: Mapped["MedicineSchedule"] = relationship()
     notes: Mapped[str] = mapped_column(String(255), nullable=True)
     deleted_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    count: Mapped[int] = mapped_column(nullable=True)
 
     def __repr__(self) -> str:
         return f"Medicine(id={self.id!r}, title={self.title!r})"
