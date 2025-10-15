@@ -1,6 +1,8 @@
 import os
-from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify, flash
+import uuid
+from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify, flash, send_from_directory, Response
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -11,6 +13,34 @@ admin = Blueprint('admin', __name__)
 # Admin credentials from environment
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+
+# Upload configuration
+UPLOAD_FOLDER = 'uploads/doctors'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_uploaded_file(file):
+    """Save uploaded file and return the file path"""
+    if file and allowed_file(file.filename):
+        # Generate unique filename
+        filename = secure_filename(file.filename)
+        name, ext = os.path.splitext(filename)
+        unique_filename = f"{uuid.uuid4()}{ext}"
+        
+        # Ensure upload directory exists
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        
+        # Save file
+        file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+        file.save(file_path)
+        
+        return f"/uploads/doctors/{unique_filename}"
+    return None
 
 def admin_required(f):
     """Decorator to require admin authentication"""
@@ -54,6 +84,23 @@ def users():
 @admin_required
 def doctors():
     return render_template('admin/doctors.html')
+
+# File serving route
+@admin.route('/uploads/doctors/<filename>')
+def uploaded_file(filename):
+    """Serve uploaded doctor photos"""
+    try:
+        # Use absolute path to avoid issues
+        upload_path = os.path.join(os.getcwd(), UPLOAD_FOLDER)
+        return send_from_directory(upload_path, filename, as_attachment=False)
+    except FileNotFoundError:
+        from flask import current_app
+        current_app.logger.error(f"File not found: {UPLOAD_FOLDER}/{filename}")
+        return Response("File not found", status=404)
+    except Exception as e:
+        from flask import current_app
+        current_app.logger.error(f"Error serving file {filename}: {str(e)}")
+        return Response("Error serving file", status=500)
 
 # API routes for user management
 @admin.route('/api/users', methods=['GET'])
@@ -172,14 +219,28 @@ def api_create_doctor():
     from models.doctor.validations import CreateDoctorValidation
     
     try:
-        data = request.get_json()
-        validation = CreateDoctorValidation(**data)
+        # Handle file upload
+        photo_url = None
+        if 'photo' in request.files:
+            file = request.files['photo']
+            if file and file.filename:
+                photo_url = save_uploaded_file(file)
+                if not photo_url:
+                    return jsonify({'error': 'Недопустимый формат файла. Разрешены: PNG, JPG, JPEG, GIF, WEBP'}), 400
+        
+        # Get form data
+        user_id = request.form.get('user_id')
+        specialisation = request.form.get('specialisation')
+        place_of_work = request.form.get('place_of_work')
+        
+        if not all([user_id, specialisation, place_of_work]):
+            return jsonify({'error': 'Все поля обязательны для заполнения'}), 400
         
         doctor = create_doctor(
-            user_id=validation.user_id,
-            specialisation=validation.specialisation,
-            place_of_work=validation.place_of_work,
-            photo_url=validation.photo_url
+            user_id=int(user_id),
+            specialisation=specialisation,
+            place_of_work=place_of_work,
+            photo_url=photo_url
         )
         
         return jsonify({
@@ -199,19 +260,33 @@ def api_update_doctor(doctor_id):
     from models.doctor.operations.get_doctor_by_id import get_doctor_by_id
     
     try:
-        data = request.get_json()
-        
         # Check if doctor exists
         doctor = get_doctor_by_id(doctor_id)
         if not doctor:
-            return jsonify({'error': 'Doctor not found'}), 404
+            return jsonify({'error': 'Врач не найден'}), 404
+        
+        # Handle file upload
+        photo_url = doctor.photo_url  # Keep existing photo by default
+        if 'photo' in request.files:
+            file = request.files['photo']
+            if file and file.filename:
+                photo_url = save_uploaded_file(file)
+                if not photo_url:
+                    return jsonify({'error': 'Недопустимый формат файла. Разрешены: PNG, JPG, JPEG, GIF, WEBP'}), 400
+        
+        # Get form data
+        specialisation = request.form.get('specialisation')
+        place_of_work = request.form.get('place_of_work')
+        
+        if not all([specialisation, place_of_work]):
+            return jsonify({'error': 'Все поля обязательны для заполнения'}), 400
         
         # Update doctor
         updated_doctor = update_doctor(
-            doctor_id=doctor_id,
-            specialisation=data.get('specialisation'),
-            place_of_work=data.get('place_of_work'),
-            photo_url=data.get('photo_url')
+            doctor=doctor,
+            specialisation=specialisation,
+            place_of_work=place_of_work,
+            photo_url=photo_url
         )
         
         return jsonify({

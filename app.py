@@ -1,6 +1,7 @@
-from flask import Flask, request
 import os
+
 from dotenv import load_dotenv
+from flask import Flask, request, send_from_directory, Response
 
 # Load environment variables
 load_dotenv()
@@ -25,6 +26,10 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-product
 # Useful debugging interceptor to log all values posted to the endpoint
 @app.before_request
 def before():
+    # Skip logging for image requests
+    if request.endpoint and 'uploads' in request.endpoint:
+        return
+
     values = 'values: '
     if len(request.values) == 0:
         values += '(None)'
@@ -36,7 +41,15 @@ def before():
 # Useful debugging interceptor to log all endpoint responses
 @app.after_request
 def after(response):
-    app.logger.debug('response: ' + response.status + ', ' + response.data.decode('utf-8'))
+    # Skip logging for image requests to avoid binary data issues
+    if request.endpoint and 'uploads' in request.endpoint:
+        return response
+
+    try:
+        app.logger.debug('response: ' + response.status + ', ' + response.data.decode('utf-8'))
+    except UnicodeDecodeError:
+        # Skip logging for binary responses
+        app.logger.debug('response: ' + response.status + ', [binary data]')
     return response
 
 
@@ -52,6 +65,35 @@ def internal_error(exception):
 def handle_bad_request(e):
     app.logger.info('Bad request', e)
     return Flask.make_response('bad request', 400)
+
+
+# File serving route for uploads (without admin prefix)
+@app.route('/uploads/doctors/<filename>')
+def serve_uploaded_file(filename):
+    """Serve uploaded doctor photos from the main app"""
+    try:
+        # Use absolute path to avoid issues
+        upload_path = os.path.join(os.getcwd(), 'uploads', 'doctors')
+        app.logger.debug(f"Serving file: {filename} from {upload_path}")
+
+        # Check if file exists
+        file_path = os.path.join(upload_path, filename)
+        if not os.path.exists(file_path):
+            app.logger.error(f"File not found: {file_path}")
+            return Response("File not found", status=404)
+
+        # Serve the file
+        response = send_from_directory(upload_path, filename, as_attachment=False)
+        response.direct_passthrough = False
+        app.logger.debug(f"File served successfully: {filename}")
+        return response
+
+    except FileNotFoundError:
+        app.logger.error(f"File not found: uploads/doctors/{filename}")
+        return Response("File not found", status=404)
+    except Exception as e:
+        app.logger.error(f"Error serving file {filename}: {str(e)}")
+        return Response("Error serving file", status=500)
 
 
 app.register_blueprint(admin, url_prefix='/admin')
