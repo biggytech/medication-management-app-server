@@ -47,6 +47,9 @@
                         <select class="form-control" id="addDoctorUserId" name="user_id" required>
                             <option value="">Выберите пользователя...</option>
                         </select>
+                        <div class="form-text" id="userSelectHelp">
+                            Доступны только пользователи, которые еще не являются врачами
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="addSpecialisation" class="form-label">Специализация</label>
@@ -179,10 +182,14 @@
             if (availableUsers.length === 0) {
                 select.append('<option value="" disabled>Нет доступных пользователей</option>');
                 select.prop('disabled', true);
+                $('#userSelectHelp').text('Все пользователи уже являются врачами').addClass('text-warning');
+                $('#addDoctorForm button[type="submit"]').prop('disabled', true);
             } else {
                 availableUsers.forEach(function(user) {
                     select.append(`<option value="${user.id}">${user.full_name} (${user.email})</option>`);
                 });
+                $('#userSelectHelp').text('Доступны только пользователи, которые еще не являются врачами').removeClass('text-warning');
+                $('#addDoctorForm button[type="submit"]').prop('disabled', false);
             }
         }).fail(function() {
             alert('Ошибка загрузки данных');
@@ -190,8 +197,15 @@
     }
 
     function addDoctor() {
+        const userId = $('#addDoctorUserId').val();
+        
+        if (!userId) {
+            alert('Пожалуйста, выберите пользователя');
+            return;
+        }
+        
         const formData = {
-            user_id: parseInt($('#addDoctorUserId').val()),
+            user_id: parseInt(userId),
             specialisation: $('#addSpecialisation').val(),
             place_of_work: $('#addPlaceOfWork').val(),
             photo_url: $('#addPhotoUrl').val() || null
@@ -206,6 +220,7 @@
                 $('#addDoctorModal').modal('hide');
                 $('#addDoctorForm')[0].reset();
                 loadDoctors();
+                loadUsersForDoctor(); // Reload users list to update available options
                 alert('Врач успешно добавлен');
             },
             error: function(xhr) {
@@ -261,6 +276,7 @@
                 method: 'DELETE',
                 success: function() {
                     loadDoctors();
+                    loadUsersForDoctor(); // Reload users list to make the user available again
                     alert('Врач успешно удален');
                 },
                 error: function(xhr) {
