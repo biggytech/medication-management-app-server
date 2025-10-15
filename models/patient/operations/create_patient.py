@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from models.patient.patient import Patient
 from models.doctor.doctor import Doctor
 from services.db.decorators.with_session import with_session
@@ -43,5 +43,10 @@ def create_patient(session: Session, user_id: int, doctor_id: int) -> Patient:
     session.add(patient)
     session.commit()
     session.refresh(patient)
+    
+    # Eagerly load the doctor relationship to avoid lazy loading issues
+    patient = session.query(Patient).options(
+        joinedload(Patient.doctor).joinedload(Doctor.user)
+    ).filter(Patient.id == patient.id).first()
     
     return patient

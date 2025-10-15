@@ -1,5 +1,6 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from models.patient.patient import Patient
+from models.doctor.doctor import Doctor
 from services.db.decorators.with_session import with_session
 
 
@@ -15,5 +16,7 @@ def get_patients_by_user_id(session: Session, user_id: int) -> list[Patient]:
     Returns:
         list[Patient]: List of patient relationships for the user
     """
-    patients = session.query(Patient).filter(Patient.user_id == user_id).all()
+    patients = session.query(Patient).options(
+        joinedload(Patient.doctor).joinedload(Doctor.user)
+    ).filter(Patient.user_id == user_id).all()
     return patients
