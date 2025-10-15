@@ -91,3 +91,7 @@ def api_model_delete(user, model_id):
 - Use `jsonify()` for responses
 - Always validate request data with Pydantic schemas
 - Include user context in operations (user.id)
+
+## Performance
+
+- Do NOT add limit/offset to queries and APIs until requested

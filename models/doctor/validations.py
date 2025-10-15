@@ -15,3 +15,8 @@ class CreateDoctorValidation(UpdateDoctorValidation):
     """Validation schema for creating a new doctor."""
     user_id: int = Field(gt=0, description="ID of the user account linked to this doctor")
 
+
+class SearchDoctorsValidation(BaseModel):
+    """Validation schema for searching doctors by name."""
+    name: Optional[str] = Field(None, min_length=1, max_length=255, description="Search query for doctor's name")
+
