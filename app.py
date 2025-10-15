@@ -98,7 +98,7 @@ def serve_uploaded_file(filename):
 
 
 app.register_blueprint(admin, url_prefix='/admin')
-app.register_blueprint(api_doctors, url_prefix='')
+app.register_blueprint(api_doctors, url_prefix='/api/doctors')
 app.register_blueprint(api_sign_in_default, url_prefix='/api/sign-in/default')
 app.register_blueprint(api_sign_up_anonymous, url_prefix='/api/sign-up/anonymous')
 app.register_blueprint(api_sign_up_default, url_prefix='/api/sign-up/default')

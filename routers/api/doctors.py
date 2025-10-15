@@ -4,15 +4,14 @@ from models.doctor.operations.get_doctors import get_doctors
 from models.doctor.operations.search_doctors_by_name import search_doctors_by_name
 from models.doctor.validations import SearchDoctorsValidation
 from services.routers.decorators.token_required import token_required
-from services.routers.decorators.validate_request import validate_request
 
 # Create Blueprint for doctors API
-api_doctors = Blueprint('api_doctors', __name__)
+api_doctors = Blueprint('/api/doctors', __name__)
 
 
-@api_doctors.route('/api/doctors', methods=['GET'])
+@api_doctors.route('/', methods=['GET'])
 @token_required
-def search_doctors():
+def search_doctors(user):
     """
     Search doctors by name or get all doctors.
     
@@ -23,20 +22,20 @@ def search_doctors():
         JSON response with list of doctors matching search criteria
     """
     try:
+        name = request.args.get('name')
+
         # Validate request parameters
         validation_data = SearchDoctorsValidation(
-            name=request.args.get('name')
+            name=name
         )
-        
+
         # Get search parameters
-        name_query = validation_data.name
-        
         # Search doctors by name if name query provided, otherwise get all doctors
-        if name_query:
-            doctors = search_doctors_by_name(name_query=name_query)
+        if name:
+            doctors = search_doctors_by_name(name_query=name)
         else:
             doctors = get_doctors()
-        
+
         # Convert doctors to JSON-serializable format
         doctors_data = []
         for doctor in doctors:
@@ -54,13 +53,13 @@ def search_doctors():
                 }
             }
             doctors_data.append(doctor_data)
-        
+
         return jsonify({
             'success': True,
             'doctors': doctors_data,
             'total': len(doctors_data)
         }), 200
-        
+
     except Exception as e:
         return jsonify({
             'success': False,

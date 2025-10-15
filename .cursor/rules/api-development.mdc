@@ -24,6 +24,13 @@ from services.routers.decorators.validate_request import validate_request, BODY
 api_model_name = Blueprint('/api/model_name', __name__)
 ```
 
+and then it should be defined in the `app.py` file:
+```python
+from routers.api.model_name import api_model_name
+
+app.register_blueprint(api_model_name, url_prefix='/api/model_name')
+```
+
 ## Route Decorators
 
 **Always use these decorators:**

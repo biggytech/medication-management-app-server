@@ -1,4 +1,4 @@
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
 
 from models.doctor.doctor import Doctor
@@ -22,13 +22,13 @@ def search_doctors_by_name(session, name_query):
     stmt = select(Doctor).options(
         joinedload(Doctor.user)  # Load the related user data
     ).join(User, Doctor.user_id == User.id)
-    
+
     # Add case-insensitive search filter on user's full_name
     if name_query and name_query.strip():
         search_term = f"%{name_query.strip()}%"
         stmt = stmt.where(
             func.lower(User.full_name).like(func.lower(search_term))
         )
-    
+
     doctors = session.scalars(stmt).all()
     return doctors
