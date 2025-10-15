@@ -12,6 +12,7 @@ from routers.api.health_tracker_logs import api_health_tracker_logs
 from routers.api.health_trackers import api_health_trackers
 from routers.api.medication_logs import api_medication_logs
 from routers.api.medicines import api_medicines
+from routers.api.patients import api_patients
 from routers.api.sign_in.default import api_sign_in_default
 from routers.api.sign_out.anonymous import api_sign_out_anonymous
 from routers.api.sign_up.anonymous import api_sign_up_anonymous
@@ -99,6 +100,7 @@ def serve_uploaded_file(filename):
 
 app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(api_doctors, url_prefix='/api/doctors')
+app.register_blueprint(api_patients, url_prefix='/api/patients')
 app.register_blueprint(api_sign_in_default, url_prefix='/api/sign-in/default')
 app.register_blueprint(api_sign_up_anonymous, url_prefix='/api/sign-up/anonymous')
 app.register_blueprint(api_sign_up_default, url_prefix='/api/sign-up/default')
