@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Users Management</h5>
+            </div>
+            <div class="card-body">
+                <p>Manage user accounts, edit user information, and change passwords.</p>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-primary">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user-md"></i> Doctors Management</h5>
+            </div>
+            <div class="card-body">
+                <p>Create and manage doctor profiles, assign doctors to users.</p>
+                <a href="{{ url_for('admin.doctors') }}" class="btn btn-primary">
+                    <i class="fas fa-user-md"></i> Manage Doctors
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> System Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h3 class="text-primary" id="user-count">-</h3>
+                            <p class="text-muted">Total Users</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h3 class="text-success" id="doctor-count">-</h3>
+                            <p class="text-muted">Total Doctors</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h3 class="text-info" id="guest-count">-</h3>
+                            <p class="text-muted">Guest Users</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Load dashboard statistics
+    loadDashboardStats();
+});
+
+function loadDashboardStats() {
+    // Load user count
+    $.get('/admin/api/users')
+        .done(function(users) {
+            $('#user-count').text(users.length);
+            const guestCount = users.filter(user => user.is_guest).length;
+            $('#guest-count').text(guestCount);
+        })
+        .fail(function() {
+            $('#user-count').text('Error');
+        });
+
+    // Load doctor count
+    $.get('/admin/api/doctors')
+        .done(function(doctors) {
+            $('#doctor-count').text(doctors.length);
+        })
+        .fail(function() {
+            $('#doctor-count').text('Error');
+        });
+}
+</script>
+{% endblock %}

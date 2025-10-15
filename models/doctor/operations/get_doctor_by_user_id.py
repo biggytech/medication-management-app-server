@@ -18,7 +18,7 @@ def get_doctor_by_user_id(session, user_id):
         Doctor: The doctor object or None if not found
     """
     stmt = select(Doctor).where(Doctor.user_id == user_id).options(
-        joinedload('*')  # Load the related user data
+        joinedload(Doctor.user)  # Load the related user data
     )
     doctor = session.scalars(stmt).first()
     return doctor

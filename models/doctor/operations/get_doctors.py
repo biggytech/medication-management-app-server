@@ -19,7 +19,7 @@ def get_doctors(session):
         List[Doctor]: List of doctor objects
     """
     stmt = select(Doctor).options(
-        joinedload('user')  # Load the related user data
+        joinedload(Doctor.user)  # Load the related user data
     )
 
     doctors = session.scalars(stmt).all()

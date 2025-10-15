@@ -11,3 +11,22 @@
 ## Development
 1. Create a migration `make create-migration`
 2. Run migrations `make migrate`
+
+## ENV FILE example
+```
+# Database
+DB_DRIVER_NAME=postgresql+psycopg2
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_DATABASE=medication
+
+# Secrets
+JWT_SECRET_KEY=my-jwt-secret-key
+SECRET_KEY=your-secret-key-change-this-in-production
+
+# Admin login
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin
+```

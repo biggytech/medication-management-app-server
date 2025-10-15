@@ -1,4 +1,9 @@
 from flask import Flask, request
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 from routers.admin import admin
 from routers.api.health_tracker_logs import api_health_tracker_logs
@@ -12,6 +17,9 @@ from routers.api.sign_up.default import api_sign_up_default
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+
+# Set secret key for sessions
+app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-production')
 
 
 # Useful debugging interceptor to log all values posted to the endpoint

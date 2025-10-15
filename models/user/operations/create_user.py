@@ -17,6 +17,10 @@ def create_user(session, **user_data):
     hashed_password = generate_password_hash(user_data['password'], method="pbkdf2") # "pbkdf2" for MacOS
     user_data['password'] = hashed_password
 
+    # Ensure is_guest has a default value if not provided
+    if 'is_guest' not in user_data:
+        user_data['is_guest'] = False
+
     new_user = User(
         uuid=uuid,
         **user_data

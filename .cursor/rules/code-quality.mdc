@@ -56,3 +56,8 @@ def operation_name(session, **kwargs):
 ## Security Best Practices
 
 - **Validate user ownership** of resources before operations
+
+## Tests
+
+- **Do not create test files**, the project does not have tests
+- **Do NOT run `python -c` commands to test results**
