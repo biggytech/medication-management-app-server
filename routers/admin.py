@@ -31,7 +31,7 @@ def login():
             session['admin_logged_in'] = True
             return redirect(url_for('admin.dashboard'))
         else:
-            flash('Invalid credentials', 'error')
+            flash('Неверные учетные данные', 'error')
     
     return render_template('admin/login.html')
 
