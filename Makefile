@@ -4,8 +4,3 @@ dev:
 start:
 	flask run
 
-create-migration:
-	alembic revision --autogenerate
-
-migrate:
-	alembic upgrade head
