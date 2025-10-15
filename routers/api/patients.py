@@ -11,7 +11,7 @@ from services.routers.decorators.validate_request import validate_request, BODY
 api_patients = Blueprint('/api/patients', __name__)
 
 
-@api_patients.route('/', methods=['POST'])
+@api_patients.route('/become-patient', methods=['POST'])
 @validate_request(BODY, PatientCreateRequest)
 @token_required
 def link_patient_to_doctor(user, validated_data):
@@ -55,7 +55,7 @@ def link_patient_to_doctor(user, validated_data):
         }), 500
 
 
-@api_patients.route('/', methods=['GET'])
+@api_patients.route('/my-doctors', methods=['GET'])
 @token_required
 def get_user_doctors(user):
     """
