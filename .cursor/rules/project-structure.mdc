@@ -45,14 +45,14 @@ models/
 - Use Blueprint pattern: `api_model_name = Blueprint('/api/model_name', __name__)`
 - Follow RESTful conventions: GET, POST, PUT, DELETE
 - Always use `@token_required` decorator for authentication
-- Use `@validate_request` decorator for request validation
+- Use `@validate_request` decorator for request **body** validation
 
 ## Code Quality Standards
 
 - **Reusability**: Create reusable functions/methods instead of duplicating code
 - **Comments**: Add comments for complex logic and tricky techniques
 - **Decorators**: Use `@with_session` for database operations
-- **Validation**: Use Pydantic models for request/response validation
+- **Validation**: Use Pydantic models for request body validation
 
 ## File References
 

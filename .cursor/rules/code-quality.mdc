@@ -35,7 +35,7 @@ def operation_name(session, **kwargs):
 
 ## Validation Patterns
 
-- **Use Pydantic models** for all request/response validation
+- **Use Pydantic models** for all request body validation
 - **Define validation schemas** in model `validations.py` files
 - **Use Field constraints** for data validation (min_length, max_length, etc.)
 - **Validate enums** properly with string validation

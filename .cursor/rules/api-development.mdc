@@ -34,7 +34,7 @@ app.register_blueprint(api_model_name, url_prefix='/api/model_name')
 ## Route Decorators
 
 **Always use these decorators:**
-- `@validate_request(BODY, ValidationClass)` - for request validation
+- `@validate_request(BODY, ValidationClass)` - for request **body** validation
 - `@token_required` - for authentication
 - Apply decorators in this order: validation first, then authentication
 
@@ -96,7 +96,7 @@ def api_model_delete(user, model_id):
 
 - Use `request.json` for request data
 - Use `jsonify()` for responses
-- Always validate request data with Pydantic schemas
+- Always validate request body data with Pydantic schemas
 - Include user context in operations (user.id)
 
 ## Performance

@@ -5,14 +5,14 @@ from models.patient.operations.delete_patient import delete_patient
 from models.patient.operations.get_patients_by_user_id import get_patients_by_user_id
 from models.patient.validations import PatientCreateRequest, PatientResponse
 from services.routers.decorators.token_required import token_required
-from services.routers.decorators.validate_request import validate_request
+from services.routers.decorators.validate_request import validate_request, BODY
 
 # Create Blueprint for patients API
 api_patients = Blueprint('/api/patients', __name__)
 
 
 @api_patients.route('/', methods=['POST'])
-@validate_request(PatientCreateRequest)
+@validate_request(BODY, PatientCreateRequest)
 @token_required
 def link_patient_to_doctor(user, validated_data):
     """
