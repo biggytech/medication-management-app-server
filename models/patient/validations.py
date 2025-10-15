@@ -27,3 +27,8 @@ class PatientDeleteResponse(BaseModel):
     """Response schema for patient deletion"""
     message: str
     success: bool
+
+
+class RemoveDoctorRequest(BaseModel):
+    """Request schema for removing a doctor from patient relationship"""
+    doctor_id: int = Field(..., description="ID of the doctor to remove")

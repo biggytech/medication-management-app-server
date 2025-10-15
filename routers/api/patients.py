@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from models.patient.operations.create_patient import create_patient
 from models.patient.operations.delete_patient import delete_patient
 from models.patient.operations.get_patients_by_user_id import get_patients_by_user_id
-from models.patient.validations import PatientCreateRequest, PatientResponse
+from models.patient.validations import PatientCreateRequest, PatientResponse, RemoveDoctorRequest
 from services.routers.decorators.token_required import token_required
 from services.routers.decorators.validate_request import validate_request, BODY
 
@@ -132,6 +132,44 @@ def unlink_patient_from_doctor(user, doctor_id):
         return jsonify({
             'success': True,
             'message': 'Successfully unlinked from doctor'
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@api_patients.route('/remove-doctor', methods=['POST'])
+@validate_request(BODY, RemoveDoctorRequest)
+@token_required
+def remove_doctor(user):
+    """
+    Remove a doctor from being a doctor for the current user.
+    
+    Request Body:
+        doctor_id: ID of the doctor to remove
+    
+    Returns:
+        JSON response with removal status
+    """
+    try:
+        validated_data = request.json
+        doctor_id = validated_data['doctor_id']
+
+        # Delete patient-doctor relationship
+        deleted = delete_patient(user_id=user.id, doctor_id=doctor_id)
+
+        if not deleted:
+            return jsonify({
+                'success': False,
+                'error': 'Patient-doctor relationship not found'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'message': 'Successfully removed doctor'
         }), 200
 
     except Exception as e:
