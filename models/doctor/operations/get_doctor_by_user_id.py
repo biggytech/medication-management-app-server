@@ -22,3 +22,4 @@ def get_doctor_by_user_id(session, user_id):
     )
     doctor = session.scalars(stmt).first()
     return doctor
+

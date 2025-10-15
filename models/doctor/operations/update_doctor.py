@@ -23,3 +23,4 @@ def update_doctor(session, doctor, **doctor_data):
     # Return the updated doctor
     updated_doctor = get_doctor_by_id(doctor.id)
     return updated_doctor
+

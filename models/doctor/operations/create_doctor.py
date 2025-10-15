@@ -27,3 +27,4 @@ def create_doctor(session, **doctor_data):
     session.refresh(new_doctor)
     
     return get_doctor_by_id(new_doctor.id)
+

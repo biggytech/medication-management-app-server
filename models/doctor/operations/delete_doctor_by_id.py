@@ -18,3 +18,4 @@ def delete_doctor_by_id(session, doctor_id):
     session.commit()
     
     return {}
+

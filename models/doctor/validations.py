@@ -14,3 +14,4 @@ class UpdateDoctorValidation(BaseModel):
 class CreateDoctorValidation(UpdateDoctorValidation):
     """Validation schema for creating a new doctor."""
     user_id: int = Field(gt=0, description="ID of the user account linked to this doctor")
+

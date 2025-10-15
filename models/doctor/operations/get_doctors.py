@@ -24,3 +24,4 @@ def get_doctors(session):
 
     doctors = session.scalars(stmt).all()
     return doctors
+
