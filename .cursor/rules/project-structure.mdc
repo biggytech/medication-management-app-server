@@ -1,0 +1,64 @@
+---
+alwaysApply: true
+---
+
+# Medication Management App - Project Structure Guide
+
+This is a Python Flask backend for a mobile medication management app using PostgreSQL and SQLAlchemy.
+
+## Core Architecture
+
+- **Models**: All models are in the `models/` folder with strict organization
+- **API Routes**: All API endpoints are in `routers/api/` folder
+- **Business Logic**: All business logic must be in model `operations/` folders
+- **Services**: Helper functions go in `services/` folder
+- **Database**: PostgreSQL with SQLAlchemy ORM
+
+## Model Organization Rules
+
+### Model Structure
+Each model follows this structure:
+```
+models/
+  model_name/
+    model_name.py          # SQLAlchemy model definition
+    validations.py         # Pydantic validation schemas
+    operations/            # ALL business logic goes here
+      create_model_name.py
+      get_model_name_by_id.py
+      get_model_names.py
+      update_model_name.py
+      delete_model_name_by_id.py
+      # ... other operations
+```
+
+### Critical Rules:
+1. **ALL business logic MUST be in `operations/` folders** - nowhere else!
+2. **Every model MUST be added to `all_models` in [models/all.py](mdc:models/all.py)**
+3. **Each model MUST have a `validations.py` file** for Pydantic schemas
+4. **Basic CRUD operations are REQUIRED** for each new model
+5. **NO `__init__.py` files** should be created anywhere
+
+## API Route Organization
+
+- API routes go in `routers/api/` with filename matching model name
+- Use Blueprint pattern: `api_model_name = Blueprint('/api/model_name', __name__)`
+- Follow RESTful conventions: GET, POST, PUT, DELETE
+- Always use `@token_required` decorator for authentication
+- Use `@validate_request` decorator for request validation
+
+## Code Quality Standards
+
+- **Reusability**: Create reusable functions/methods instead of duplicating code
+- **Comments**: Add comments for complex logic and tricky techniques
+- **Decorators**: Use `@with_session` for database operations
+- **Validation**: Use Pydantic models for request/response validation
+
+## File References
+
+- Main entry point: [app.py](mdc:app.py)
+- Database connection: [db/connect.py](mdc:db/connect.py)
+- All models registry: [models/all.py](mdc:models/all.py)
+- Base model class: [models/base.py](mdc:models/base.py)
+- Session decorator: [services/db/decorators/with_session.py](mdc:services/db/decorators/with_session.py)
+- Token auth decorator: [services/db/decorators/with_session.py](mdc:services/routers/decorators/token_required.py)

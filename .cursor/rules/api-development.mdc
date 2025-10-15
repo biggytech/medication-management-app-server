@@ -1,0 +1,93 @@
+---
+globs: routers/**/*.py
+---
+
+# API Route Development Rules
+
+When creating or modifying API routes, follow these patterns:
+
+## File Organization
+
+- API routes go in `routers/api/` folder
+- Filename must match model name (e.g., `medicines.py` for Medicine model)
+- Use Blueprint pattern for route organization
+
+## Blueprint Pattern
+
+```python
+from flask import Blueprint, request, jsonify
+from models.model_name.operations import *
+from models.model_name.validations import *
+from services.routers.decorators.token_required import token_required
+from services.routers.decorators.validate_request import validate_request, BODY
+
+api_model_name = Blueprint('/api/model_name', __name__)
+```
+
+## Route Decorators
+
+**Always use these decorators:**
+- `@token_required` - for authentication
+- `@validate_request(BODY, ValidationClass)` - for request validation
+- Apply decorators in this order: validation first, then authentication
+
+## RESTful Route Patterns
+
+### Standard CRUD Routes
+```python
+# List all
+@api_model_name.get('/list')
+@token_required
+def api_model_list(user):
+    return get_models(user.id)
+
+# Get by ID
+@api_model_name.get('/<int:model_id>')
+@token_required  
+def api_model_get(user, model_id):
+    return jsonify(get_model_by_id(model_id))
+
+# Create new
+@api_model_name.post('/add')
+@validate_request(BODY, CreateModelValidation)
+@token_required
+def api_model_add(user):
+    model_data = request.json
+    model_data['user_id'] = user.id
+    return jsonify(create_model(**model_data))
+
+# Update existing
+@api_model_name.put('/<int:model_id>')
+@validate_request(BODY, UpdateModelValidation)
+@token_required
+def api_model_update(user, model_id):
+    model_data = request.json
+    return jsonify(update_model(model_id, **model_data))
+
+# Delete
+@api_model_name.delete('/<int:model_id>')
+@token_required
+def api_model_delete(user, model_id):
+    return jsonify(delete_model_by_id(model_id))
+```
+
+## Business Logic Rules
+
+- **NO business logic in API routes**
+- **All business logic must be in model operations/ folders**
+- **API routes only handle HTTP concerns: request/response, validation, authentication**
+- **Always pass user.id to operations for user-scoped data**
+
+## Error Handling
+
+- Use try-catch blocks for operation calls
+- Return appropriate HTTP status codes
+- Provide meaningful error messages
+- Log errors for debugging
+
+## Request/Response Patterns
+
+- Use `request.json` for request data
+- Use `jsonify()` for responses
+- Always validate request data with Pydantic schemas
+- Include user context in operations (user.id)

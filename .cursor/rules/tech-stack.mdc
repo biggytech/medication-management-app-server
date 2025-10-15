@@ -1,0 +1,75 @@
+---
+alwaysApply: true
+---
+
+# Technology Stack and Dependencies
+
+## Core Technologies
+
+- **Python 3** - Primary programming language
+- **Flask** - Web framework for API development
+- **PostgreSQL** - Primary database
+- **SQLAlchemy** - ORM for database operations
+- **Virtual Environment** - Use `.venv` for dependency management
+
+## Key Dependencies
+
+Based on [requirements.txt](mdc:requirements.txt) and project structure:
+
+### Database & ORM
+- **SQLAlchemy** - Database ORM and query builder
+- **psycopg2** - PostgreSQL adapter
+
+### Web Framework
+- **Flask** - Lightweight web framework
+- **Flask-Blueprint** - Route organization
+
+### Validation & Serialization
+- **Pydantic** - Data validation and serialization
+- **marshmallow** - Alternative serialization (if used)
+
+### Authentication & Security
+- **JWT** - Token-based authentication
+- **bcrypt** - Password hashing
+
+## Development Environment
+
+### Virtual Environment Setup
+```bash
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # On macOS/Linux
+.venv\Scripts\activate     # On Windows
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Database Setup
+- Use [db/scripts/create_db.py](mdc:db/scripts/create_db.py) for database creation
+- Use [db/scripts/drop_all_tables.py](mdc:db/scripts/drop_all_tables.py) for cleanup
+
+## Project Structure Dependencies
+
+### Model Dependencies
+- All models depend on [models/base.py](mdc:models/base.py)
+- Models must be registered in [models/all.py](mdc:models/all.py)
+- Use [services/db/decorators/with_session.py](mdc:services/db/decorators/with_session.py) for database operations
+
+### API Dependencies
+- Routes depend on model operations
+- Use [services/routers/decorators/token_required.py](mdc:services/routers/decorators/token_required.py) for authentication
+- Use [services/routers/decorators/validate_request.py](mdc:services/routers/decorators/validate_request.py) for request validation
+
+## Environment Configuration
+
+- **Database connection** configured in [db/connect.py](mdc:db/connect.py)
+- **Database engine** managed in [db/engine.py](mdc:db/engine.py)
+- **Application entry point** in [app.py](mdc:app.py)
+
+## Development Tools
+
+- **Makefile** for common development tasks
+- **Virtual environment** for dependency isolation

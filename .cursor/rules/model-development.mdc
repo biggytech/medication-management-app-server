@@ -1,0 +1,85 @@
+---
+globs: models/**/*.py
+---
+
+# Model Development Rules
+
+When creating or modifying models, follow these strict patterns:
+
+## Model Definition Rules
+
+1. **Inherit from Base**: All models must inherit from [models/base.py](mdc:models/base.py)
+2. **Use @dataclass decorator**: Apply to all model classes
+3. **Define __tablename__**: Must be plural form (e.g., "medicines", "users")
+4. **Include __repr__ method**: For debugging and logging
+5. **Use proper SQLAlchemy types**: Mapped[int], Mapped[str], etc.
+
+## Required Files for Each Model
+
+### 1. Model File (model_name.py)
+```python
+import datetime
+from dataclasses import dataclass
+from sqlalchemy import String, ForeignKey, TIMESTAMP
+from sqlalchemy.orm import Mapped, relationship, mapped_column
+from models.base import Base
+
+@dataclass
+class ModelName(Base):
+    __tablename__ = "model_names"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # ... other fields
+    
+    def __repr__(self) -> str:
+        return f"ModelName(id={self.id!r}, field={self.field!r})"
+```
+
+### 2. Validations File (validations.py)
+```python
+from typing import Optional
+from pydantic import BaseModel, Field
+
+class CreateOrUpdateModelValidation(BaseModel):
+    field: str = Field(min_length=1, max_length=255)
+    optional_field: Optional[str] = Field(default=None)
+```
+
+### 3. Operations Folder
+Must include at minimum:
+- `create_model_name.py`
+- `get_model_name_by_id.py` 
+- `get_model_names.py`
+- `update_model_name.py`
+- `delete_model_name_by_id.py`
+
+## Operations Pattern
+
+All operations must follow this pattern:
+```python
+from models.model_name.model_name import ModelName
+from services.db.decorators.with_session import with_session
+
+@with_session
+def operation_name(session, **kwargs):
+    # Business logic here
+    # Always use the session parameter
+    # Return appropriate data structure
+    pass
+```
+
+## Model Registration
+
+**CRITICAL**: Every new model MUST be added to [models/all.py](mdc:models/all.py):
+```python
+from models.new_model.new_model import NewModel
+
+all_models = [User, Medicine, ..., NewModel]
+```
+
+## Business Logic Rules
+
+- **ALL business logic goes in operations/ folder**
+- **NO business logic in API routes or other locations**
+- **Use @with_session decorator for all database operations**
+- **Create reusable functions for common patterns**
+- **Add comprehensive comments for complex logic**

@@ -1,0 +1,58 @@
+---
+alwaysApply: true
+---
+
+# Code Quality and Best Practices
+
+## Reusability Principles
+
+- **Create reusable functions/methods** instead of duplicating code
+- **Extract common patterns** into utility functions in `services/` folder
+- **Use decorators** for cross-cutting concerns (authentication, validation, database sessions)
+- **Create base classes** for common model patterns
+
+## Commenting Standards
+
+Add comments for:
+- **Complex business logic** - explain the reasoning and approach
+- **Tricky techniques** - document non-obvious solutions
+- **Database operations** - explain complex queries or relationships
+- **API endpoints** - document expected behavior and edge cases
+- **TODO items** - mark incomplete features with clear descriptions
+
+## Database Session Management
+
+**Always use the @with_session decorator:**
+```python
+from services.db.decorators.with_session import with_session
+
+@with_session
+def operation_name(session, **kwargs):
+    # Use session parameter for all database operations
+    # Session is automatically managed
+    pass
+```
+
+## Validation Patterns
+
+- **Use Pydantic models** for all request/response validation
+- **Define validation schemas** in model `validations.py` files
+- **Use Field constraints** for data validation (min_length, max_length, etc.)
+- **Validate enums** properly with string validation
+
+## Error Handling
+
+- **Provide meaningful error messages** to users
+- **Log errors** for debugging and monitoring
+- **Handle edge cases** gracefully
+
+## Code Organization
+
+- **Keep functions focused** - single responsibility principle
+- **Use descriptive names** for functions, variables, and classes
+- **Group related functionality** in appropriate modules
+- **Follow consistent naming conventions** (snake_case for functions, PascalCase for classes)
+
+## Security Best Practices
+
+- **Validate user ownership** of resources before operations
