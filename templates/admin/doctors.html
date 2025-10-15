@@ -22,6 +22,7 @@
                         <th>Email</th>
                         <th>Специализация</th>
                         <th>Место работы</th>
+                        <th>Телефон</th>
                         <th>Действия</th>
                     </tr>
                 </thead>
@@ -61,6 +62,11 @@
                         <input type="text" class="form-control" id="addPlaceOfWork" name="place_of_work" required>
                     </div>
                     <div class="mb-3">
+                        <label for="addPhone" class="form-label">Телефон</label>
+                        <input type="text" class="form-control" id="addPhone" name="phone" maxlength="255">
+                        <div class="form-text">Необязательное поле</div>
+                    </div>
+                    <div class="mb-3">
                         <label for="addPhoto" class="form-label">Фото врача</label>
                         <input type="file" class="form-control" id="addPhoto" name="photo" accept="image/*">
                         <div class="form-text">Разрешены форматы: PNG, JPG, JPEG, GIF, WEBP. Максимальный размер: 5MB</div>
@@ -93,6 +99,11 @@
                     <div class="mb-3">
                         <label for="editPlaceOfWork" class="form-label">Место работы</label>
                         <input type="text" class="form-control" id="editPlaceOfWork" name="place_of_work" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPhone" class="form-label">Телефон</label>
+                        <input type="text" class="form-control" id="editPhone" name="phone" maxlength="255">
+                        <div class="form-text">Необязательное поле</div>
                     </div>
                     <div class="mb-3">
                         <label for="editPhoto" class="form-label">Фото врача</label>
@@ -154,6 +165,7 @@
                             <td>${doctor.user.email}</td>
                             <td>${doctor.specialisation}</td>
                             <td>${doctor.place_of_work}</td>
+                            <td>${doctor.phone || '-'}</td>
                             <td class="table-actions">
                                 <div class="btn-group-actions">
                                     <button class="btn btn-sm btn-outline-primary" onclick="editDoctor(${doctor.id})">
@@ -222,6 +234,7 @@
         formData.append('user_id', userId);
         formData.append('specialisation', $('#addSpecialisation').val());
         formData.append('place_of_work', $('#addPlaceOfWork').val());
+        formData.append('phone', $('#addPhone').val());
         
         // Add photo if selected
         const photoFile = $('#addPhoto')[0].files[0];
@@ -262,6 +275,7 @@
                     $('#editDoctorId').val(doctor.id);
                     $('#editSpecialisation').val(doctor.specialisation);
                     $('#editPlaceOfWork').val(doctor.place_of_work);
+                    $('#editPhone').val(doctor.phone || '');
                     
                     // Show current photo if exists
                     if (doctor.photo_url) {
@@ -281,6 +295,7 @@
         const formData = new FormData();
         formData.append('specialisation', $('#editSpecialisation').val());
         formData.append('place_of_work', $('#editPlaceOfWork').val());
+        formData.append('phone', $('#editPhone').val());
         
         // Add photo if selected
         const photoFile = $('#editPhoto')[0].files[0];

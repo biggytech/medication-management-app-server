@@ -44,6 +44,7 @@ def search_doctors(user):
                 'user_id': doctor.user_id,
                 'specialisation': doctor.specialisation,
                 'place_of_work': doctor.place_of_work,
+                'phone': doctor.phone,
                 'photo_url': doctor.photo_url,
                 'user': {
                     'id': doctor.user.id,

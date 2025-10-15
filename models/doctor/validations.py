@@ -8,6 +8,7 @@ class UpdateDoctorValidation(BaseModel):
     specialisation: Optional[str] = Field(None, min_length=1, max_length=255,
                                           description="Doctor's medical specialisation")
     place_of_work: Optional[str] = Field(None, min_length=1, max_length=255, description="Place where the doctor works")
+    phone: Optional[str] = Field(None, max_length=255, description="Doctor's phone number")
     photo_url: Optional[str] = Field(None, max_length=500, description="Local file path for doctor's photo")
 
 

@@ -204,6 +204,7 @@ def api_get_doctors():
         'user_id': doctor.user_id,
         'specialisation': doctor.specialisation,
         'place_of_work': doctor.place_of_work,
+        'phone': doctor.phone,
         'photo_url': doctor.photo_url,
         'user': {
             'id': doctor.user.id,
@@ -232,6 +233,7 @@ def api_create_doctor():
         user_id = request.form.get('user_id')
         specialisation = request.form.get('specialisation')
         place_of_work = request.form.get('place_of_work')
+        phone = request.form.get('phone')
         
         if not all([user_id, specialisation, place_of_work]):
             return jsonify({'error': 'Все поля обязательны для заполнения'}), 400
@@ -240,6 +242,7 @@ def api_create_doctor():
             user_id=int(user_id),
             specialisation=specialisation,
             place_of_work=place_of_work,
+            phone=phone,
             photo_url=photo_url
         )
         
@@ -248,6 +251,7 @@ def api_create_doctor():
             'user_id': doctor.user_id,
             'specialisation': doctor.specialisation,
             'place_of_work': doctor.place_of_work,
+            'phone': doctor.phone,
             'photo_url': doctor.photo_url
         }), 201
     except Exception as e:
@@ -277,6 +281,7 @@ def api_update_doctor(doctor_id):
         # Get form data
         specialisation = request.form.get('specialisation')
         place_of_work = request.form.get('place_of_work')
+        phone = request.form.get('phone')
         
         if not all([specialisation, place_of_work]):
             return jsonify({'error': 'Все поля обязательны для заполнения'}), 400
@@ -286,6 +291,7 @@ def api_update_doctor(doctor_id):
             doctor=doctor,
             specialisation=specialisation,
             place_of_work=place_of_work,
+            phone=phone,
             photo_url=photo_url
         )
         
@@ -294,6 +300,7 @@ def api_update_doctor(doctor_id):
             'user_id': updated_doctor.user_id,
             'specialisation': updated_doctor.specialisation,
             'place_of_work': updated_doctor.place_of_work,
+            'phone': updated_doctor.phone,
             'photo_url': updated_doctor.photo_url
         })
     except Exception as e:

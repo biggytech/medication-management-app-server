@@ -19,6 +19,7 @@ class Doctor(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
     specialisation: Mapped[str] = mapped_column(String(255), nullable=False)
     place_of_work: Mapped[str] = mapped_column(String(255), nullable=False)
+    phone: Mapped[str] = mapped_column(String(255), nullable=True)  # Doctor's phone number
     photo_url: Mapped[str] = mapped_column(String(500), nullable=True)  # Local file path for photo
 
     # Relationship to User model
