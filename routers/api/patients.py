@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
 from models.patient.operations.create_patient import create_patient
 from models.patient.operations.delete_patient import delete_patient
@@ -14,7 +14,9 @@ api_patients = Blueprint('/api/patients', __name__)
 @api_patients.route('/become-patient', methods=['POST'])
 @validate_request(BODY, PatientCreateRequest)
 @token_required
-def link_patient_to_doctor(user, validated_data):
+def link_patient_to_doctor(user):
+    validated_data = request.json
+
     """
     Link a user to a doctor (create patient-doctor relationship).
     
@@ -25,7 +27,7 @@ def link_patient_to_doctor(user, validated_data):
         JSON response with created patient relationship data
     """
     try:
-        doctor_id = validated_data.doctor_id
+        doctor_id = validated_data['doctor_id']
 
         # Create patient-doctor relationship
         patient = create_patient(user_id=user.id, doctor_id=doctor_id)
