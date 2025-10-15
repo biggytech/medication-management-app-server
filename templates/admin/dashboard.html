@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Admin Panel{% endblock %}
+{% block title %}Панель управления - Админ-панель{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Dashboard</h1>
+    <h1 class="h2">Панель управления</h1>
 </div>
 
 <div class="row">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-users"></i> Users Management</h5>
+                <h5><i class="fas fa-users"></i> Управление пользователями</h5>
             </div>
             <div class="card-body">
-                <p>Manage user accounts, edit user information, and change passwords.</p>
+                <p>Управление учетными записями пользователей, редактирование информации и изменение паролей.</p>
                 <a href="{{ url_for('admin.users') }}" class="btn btn-primary">
-                    <i class="fas fa-users"></i> Manage Users
+                    <i class="fas fa-users"></i> Управление пользователями
                 </a>
             </div>
         </div>
@@ -25,12 +25,12 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-user-md"></i> Doctors Management</h5>
+                <h5><i class="fas fa-user-md"></i> Управление врачами</h5>
             </div>
             <div class="card-body">
-                <p>Create and manage doctor profiles, assign doctors to users.</p>
+                <p>Создание и управление профилями врачей, назначение врачей пользователям.</p>
                 <a href="{{ url_for('admin.doctors') }}" class="btn btn-primary">
-                    <i class="fas fa-user-md"></i> Manage Doctors
+                    <i class="fas fa-user-md"></i> Управление врачами
                 </a>
             </div>
         </div>
@@ -41,26 +41,26 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-info-circle"></i> System Information</h5>
+                <h5><i class="fas fa-info-circle"></i> Информация о системе</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="text-center">
                             <h3 class="text-primary" id="user-count">-</h3>
-                            <p class="text-muted">Total Users</p>
+                            <p class="text-muted">Всего пользователей</p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="text-center">
                             <h3 class="text-success" id="doctor-count">-</h3>
-                            <p class="text-muted">Total Doctors</p>
+                            <p class="text-muted">Всего врачей</p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="text-center">
                             <h3 class="text-info" id="guest-count">-</h3>
-                            <p class="text-muted">Guest Users</p>
+                            <p class="text-muted">Гостевых пользователей</p>
                         </div>
                     </div>
                 </div>
