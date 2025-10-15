@@ -21,3 +21,8 @@ class SearchDoctorsValidation(BaseModel):
     """Validation schema for searching doctors by name."""
     name: Optional[str] = Field(None, min_length=1, max_length=255, description="Search query for doctor's name")
 
+
+class GetDoctorByIdValidation(BaseModel):
+    """Validation schema for getting a doctor by ID."""
+    doctor_id: int = Field(gt=0, description="ID of the doctor to retrieve")
+

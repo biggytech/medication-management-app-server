@@ -34,8 +34,8 @@ app.register_blueprint(api_model_name, url_prefix='/api/model_name')
 ## Route Decorators
 
 **Always use these decorators:**
-- `@token_required` - for authentication
 - `@validate_request(BODY, ValidationClass)` - for request validation
+- `@token_required` - for authentication
 - Apply decorators in this order: validation first, then authentication
 
 ## RESTful Route Patterns
