@@ -178,7 +178,7 @@ def send_patient_report_email(user):
             }), 400
 
         # Send email with patient report
-        email_service = PatientReportEmailService()
+        email_service = PatientReportEmailService(language=language)
         result = email_service.send_patient_report_to_doctor(
             doctor_id=doctor_id,
             patient_user_id=patient_user_id,

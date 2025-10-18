@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Dict
 
 from flask import current_app
 from flask_mail import Message
@@ -15,9 +16,49 @@ from services.pdf.generate_patient_report import PatientReportGenerator
 class PatientReportEmailService:
     """Service for sending patient reports via email to doctors"""
 
-    def __init__(self):
+    def __init__(self, language: str = "en-US"):
         from flask_mail import Mail
         self.mail = Mail()
+        self.language = language
+        self.translations = self._get_translations()
+
+    def _get_translations(self) -> Dict[str, Dict[str, str]]:
+        """Get translations for email content in different languages"""
+        return {
+            "en-US": {
+                "email_subject": "Patient Report - {patient_name} ({start_date} to {end_date})",
+                "email_greeting": "Dear Dr. {doctor_name},",
+                "email_body_intro": "Please find attached the medical report for patient {patient_name} covering the period from {start_date} to {end_date}.",
+                "email_body_content": "This report includes:\n- Medication logs and adherence\n- Health tracker data\n- Patient information and demographics",
+                "email_body_instruction": "Please review the report and contact the patient if any follow-up is required.",
+                "email_signature": "Best regards,\nMedication Management System"
+            },
+            "ru-RU": {
+                "email_subject": "Отчет о пациенте - {patient_name} ({start_date} - {end_date})",
+                "email_greeting": "Уважаемый доктор {doctor_name},",
+                "email_body_intro": "Во вложении находится медицинский отчет для пациента {patient_name} за период с {start_date} по {end_date}.",
+                "email_body_content": "Отчет включает:\n- Журнал приема лекарств и соблюдение режима\n- Данные мониторинга здоровья\n- Информацию о пациенте и демографические данные",
+                "email_body_instruction": "Пожалуйста, ознакомьтесь с отчетом и свяжитесь с пациентом, если требуется дополнительное наблюдение.",
+                "email_signature": "С уважением,\nСистема управления лекарствами"
+            }
+        }
+
+    def _t(self, key: str) -> str:
+        """Get translation for current language"""
+        return self.translations.get(self.language, self.translations["en-US"]).get(key, key)
+
+    def _format_date(self, date_obj: datetime, format_type: str = "short") -> str:
+        """Format date according to language"""
+        if self.language == "ru-RU":
+            if format_type == "long":
+                return date_obj.strftime('%d %B %Y')
+            else:
+                return date_obj.strftime('%d.%m.%Y')
+        else:
+            if format_type == "long":
+                return date_obj.strftime('%B %d, %Y')
+            else:
+                return date_obj.strftime('%Y-%m-%d')
 
     def send_patient_report_to_doctor(self, doctor_id: int, patient_user_id: int,
                                       start_date: datetime, end_date: datetime,
@@ -36,6 +77,11 @@ class PatientReportEmailService:
             dict: Result with success status and message
         """
         try:
+            # Update language if different from initialization
+            if language != self.language:
+                self.language = language
+                self.translations = self._get_translations()
+
             # Get doctor information
             doctor = get_doctor_by_id(doctor_id=doctor_id)
             if not doctor:
@@ -129,25 +175,32 @@ class PatientReportEmailService:
             dict: Result with success status and message
         """
         try:
-            # Create email message
-            subject = f"Patient Report - {patient_name} ({start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')})"
+            # Format dates according to language
+            start_date_str = self._format_date(start_date, "short")
+            end_date_str = self._format_date(end_date, "short")
+            start_date_long = self._format_date(start_date, "long")
+            end_date_long = self._format_date(end_date, "long")
 
-            # Create email body
-            body = f"""
-Dear Dr. {doctor_name},
+            # Create email message with translations
+            subject = self._t("email_subject").format(
+                patient_name=patient_name,
+                start_date=start_date_str,
+                end_date=end_date_str
+            )
 
-Please find attached the medical report for patient {patient_name} covering the period from {start_date.strftime('%B %d, %Y')} to {end_date.strftime('%B %d, %Y')}.
+            # Create email body with translations
+            body = f"""{self._t("email_greeting").format(doctor_name=doctor_name)}
 
-This report includes:
-- Medication logs and adherence
-- Health tracker data
-- Patient information and demographics
+{self._t("email_body_intro").format(patient_name=patient_name, start_date=start_date_long, end_date=end_date_long)}
 
-Please review the report and contact the patient if any follow-up is required.
+{self._t("email_body_content")}
 
-Best regards,
-Medication Management System
+{self._t("email_body_instruction")}
+
+{self._t("email_signature")}
             """.strip()
+
+            print('doctor_email', doctor_email)
 
             # Create message
             msg = Message(
