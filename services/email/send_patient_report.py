@@ -165,12 +165,12 @@ Medication Management System
             print('Started sending!')
 
             # Send email using the app's mail instance
-            from flask_mail import Mail
-            mail = Mail(current_app)
-            mail.send(msg)
-
-            # from app import mail
+            # from flask_mail import Mail
+            # mail = Mail(current_app)
             # mail.send(msg)
+
+            from app import mail
+            mail.send(msg)
 
             return {
                 'success': True,
