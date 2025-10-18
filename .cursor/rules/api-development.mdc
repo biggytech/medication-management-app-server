@@ -103,3 +103,8 @@ def api_model_delete(user, model_id):
 ## Performance
 
 - Do NOT add limit/offset to queries and APIs until requested
+
+## Tests
+
+- **Do NOT create python test files**, the project does not have tests!
+- **Do NOT run python compile and execution commands!**

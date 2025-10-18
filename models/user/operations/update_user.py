@@ -13,10 +13,15 @@ def update_user(session, user, **user_data):
 
     # uuid = uuid4()
 
-    hashed_password = generate_password_hash(user_data['password'], method="pbkdf2") # "pbkdf2" for MacOS
-    user_data['password'] = hashed_password
+    # Only hash password if it's being updated
+    if 'password' in user_data and user_data['password']:
+        hashed_password = generate_password_hash(user_data['password'], method="pbkdf2") # "pbkdf2" for MacOS
+        user_data['password'] = hashed_password
 
-    session.query(User).filter(User.id == user.id).update(user_data)
+    # Filter out None values to avoid overwriting with None
+    filtered_data = {k: v for k, v in user_data.items() if v is not None}
+    
+    session.query(User).filter(User.id == user.id).update(filtered_data)
 
     token = generate_token(user)
 
@@ -27,5 +32,8 @@ def update_user(session, user, **user_data):
     return {
         "id": updated_user.id,
         "token": token,
-        "full_name": updated_user.full_name
+        "full_name": updated_user.full_name,
+        "email": updated_user.email,
+        "sex": updated_user.sex,
+        "date_of_birth": updated_user.date_of_birth.isoformat() if updated_user.date_of_birth else None
     }

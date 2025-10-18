@@ -2,10 +2,12 @@ from dataclasses import dataclass
 from sqlalchemy import text
 from sqlalchemy import String
 from sqlalchemy import Boolean
+from sqlalchemy import Date
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from models.base import Base
+from models.common.enums.sex_types import SexTypesType
 
 @dataclass
 class User(Base):
@@ -16,6 +18,8 @@ class User(Base):
     is_guest: Mapped[bool] = mapped_column(Boolean())
     password: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(String(255)) # TODO: make unique
+    sex: Mapped[str] = mapped_column(SexTypesType, nullable=True)  # Optional field for sex
+    date_of_birth: Mapped[Date] = mapped_column(Date, nullable=True)  # Optional field for date of birth
     # addresses: Mapped[List["Address"]] = relationship(
     #     back_populates="user", cascade="all, delete-orphan"
     # )

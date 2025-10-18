@@ -17,6 +17,7 @@ from routers.api.sign_in.default import api_sign_in_default
 from routers.api.sign_out.anonymous import api_sign_out_anonymous
 from routers.api.sign_up.anonymous import api_sign_up_anonymous
 from routers.api.sign_up.default import api_sign_up_default
+from routers.api.users import api_users
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -109,3 +110,4 @@ app.register_blueprint(api_medicines, url_prefix='/api/medicines')
 app.register_blueprint(api_medication_logs, url_prefix='/api/medication-logs')
 app.register_blueprint(api_health_trackers, url_prefix='/api/health-trackers')
 app.register_blueprint(api_health_tracker_logs, url_prefix='/api/health-tracker-logs')
+app.register_blueprint(api_users, url_prefix='/api/users')
