@@ -16,19 +16,21 @@ def get_user_by_id(session, user_id):
         doctor = session.scalars(doctor_stmt).first()
         is_doctor = doctor is not None
 
+        print('ISSSSSS')
+        print(is_doctor)
         user.is_doctor = is_doctor
 
         # # Convert user to dict and add is_doctor field
-        # user_dict = {
-        #     'id': user.id,
-        #     'uuid': str(user.uuid),
-        #     'full_name': user.full_name,
-        #     'is_guest': user.is_guest,
-        #     'email': user.email,
-        #     'sex': user.sex,
-        #     'date_of_birth': user.date_of_birth.isoformat() if user.date_of_birth else None,
-        #     'is_doctor': is_doctor
-        # }
-        # return user_dict
+        user_dict = {
+            'id': user.id,
+            'uuid': str(user.uuid),
+            'full_name': user.full_name,
+            'is_guest': user.is_guest,
+            'email': user.email,
+            'sex': user.sex,
+            'date_of_birth': user.date_of_birth.isoformat() if user.date_of_birth else None,
+            'is_doctor': is_doctor
+        }
+        return user_dict
 
     return user

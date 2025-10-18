@@ -27,7 +27,6 @@ def sign_up_anonymous_finish(user):
 
     token = generate_token(user)
 
-    return {
-        **updated_user,
-        token: token
-    }
+    updated_user.token = token
+
+    return updated_user

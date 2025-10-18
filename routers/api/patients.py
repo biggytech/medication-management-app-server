@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
 
+from models.doctor.operations.get_doctor_by_user_id import get_doctor_by_user_id
 from models.patient.operations.create_patient import create_patient
 from models.patient.operations.delete_patient import delete_patient
-from models.patient.operations.get_patients_by_user_id import get_patients_by_user_id
 from models.patient.operations.get_patients_by_doctor_id import get_patients_by_doctor_id
-from models.doctor.operations.get_doctor_by_user_id import get_doctor_by_user_id
+from models.patient.operations.get_patients_by_user_id import get_patients_by_user_id
 from models.patient.validations import PatientCreateRequest, PatientResponse, RemoveDoctorRequest
 from services.routers.decorators.token_required import token_required
 from services.routers.decorators.validate_request import validate_request, BODY
@@ -194,7 +194,7 @@ def get_patients_for_doctor(user):
     try:
         # Get the current user's doctor information
         doctor = get_doctor_by_user_id(user_id=user.id)
-        
+
         if not doctor:
             return jsonify({
                 'success': False,
