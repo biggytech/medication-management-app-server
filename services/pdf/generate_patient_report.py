@@ -77,7 +77,9 @@ class PatientReportGenerator:
                 "menstrual_cycle": "Menstrual Cycle",
                 "generated_on": "Generated on",
                 "page": "Page",
-                "of": "of"
+                "of": "of",
+                "no_medication_data": "No medication data available for this period.",
+                "no_health_tracker_data": "No health tracker data available for this period."
             },
             "ru-RU": {
                 "title": "Медицинский отчет пациента",
@@ -109,7 +111,9 @@ class PatientReportGenerator:
                 "menstrual_cycle": "Менструальный цикл",
                 "generated_on": "Создано",
                 "page": "Страница",
-                "of": "из"
+                "of": "из",
+                "no_medication_data": "Данные о лекарствах за этот период отсутствуют.",
+                "no_health_tracker_data": "Данные о показателях здоровья за этот период отсутствуют."
             }
         }
 
@@ -201,6 +205,16 @@ class PatientReportGenerator:
             spaceAfter=12,
             spaceBefore=20,
             textColor=colors.darkblue
+        )
+
+        normal_style = ParagraphStyle(
+            'CustomNormal',
+            parent=styles['Normal'],
+            fontName=self._get_font_name(),
+            fontSize=10,
+            spaceAfter=5,
+            spaceBefore=5,
+            textColor=colors.black
         )
 
         # Build content
@@ -317,7 +331,8 @@ class PatientReportGenerator:
 
             story.append(med_table)
         else:
-            story.append(Paragraph("No medication data available for this period.", styles['Normal']))
+            no_medication_text = self._ensure_unicode(self._t("no_medication_data"))
+            story.append(Paragraph(no_medication_text, normal_style))
 
         story.append(Spacer(1, 20))
 
@@ -381,7 +396,8 @@ class PatientReportGenerator:
 
             story.append(tracker_table)
         else:
-            story.append(Paragraph("No health tracker data available for this period.", styles['Normal']))
+            no_health_tracker_text = self._ensure_unicode(self._t("no_health_tracker_data"))
+            story.append(Paragraph(no_health_tracker_text, normal_style))
 
         # Add generation timestamp
         story.append(Spacer(1, 30))
