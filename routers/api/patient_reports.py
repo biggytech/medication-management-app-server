@@ -7,6 +7,7 @@ from models.health_tracker_log.operations.get_health_tracker_logs_by_date_range 
 from models.medication_log.operations.get_medication_logs_by_date_range import get_medication_logs_by_date_range
 from models.user.operations.get_user_by_id import get_user_by_id
 from services.pdf.generate_patient_report import PatientReportGenerator
+from services.email.send_patient_report import PatientReportEmailService
 from services.routers.decorators.token_required import token_required
 
 # Create Blueprint for patient reports API
@@ -124,6 +125,88 @@ def generate_patient_report(user):
         return jsonify({
             'success': False,
             'error': f'Failed to generate report: {str(e)}'
+        }), 500
+
+
+@api_patient_reports.route('/send-email', methods=['POST'])
+@token_required
+def send_patient_report_email(user):
+    """
+    Send a patient report PDF via email to a doctor.
+    
+    Query Parameters:
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+        doctor_id: ID of the doctor to send the report to
+        language: Language for the report (en-US or ru-RU, default: en-US)
+    
+    Returns:
+        JSON response with success status and message
+    """
+    try:
+        # Get validated query parameters
+        validated_data = request.args
+
+        start_date_str = validated_data['start_date']
+        end_date_str = validated_data['end_date']
+        doctor_id = int(validated_data['doctor_id'])
+        patient_user_id = user.id
+        language = validated_data.get('language', 'en-US')
+
+        # Validate language
+        if language not in ['en-US', 'ru-RU']:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid language. Supported languages: en-US, ru-RU'
+            }), 400
+
+        # Parse dates
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid date format. Use YYYY-MM-DD format'
+            }), 400
+
+        # Validate date range
+        if start_date > end_date:
+            return jsonify({
+                'success': False,
+                'error': 'Start date must be before or equal to end date'
+            }), 400
+
+        # Send email with patient report
+        email_service = PatientReportEmailService()
+        result = email_service.send_patient_report_to_doctor(
+            doctor_id=doctor_id,
+            patient_user_id=patient_user_id,
+            start_date=start_date,
+            end_date=end_date,
+            language=language
+        )
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': result['message']
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': result['error']
+            }), 400
+
+    except ValueError as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to send report: {str(e)}'
         }), 500
 
 

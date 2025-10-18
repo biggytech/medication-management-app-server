@@ -2,6 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, request, send_from_directory, Response
+from flask_mail import Mail
 
 # Load environment variables
 load_dotenv()
@@ -25,6 +26,18 @@ app.url_map.strict_slashes = False
 
 # Set secret key for sessions
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-production')
+
+# Configure Flask-Mail
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False').lower() == 'true'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@medicationapp.com')
+
+# Initialize Flask-Mail
+mail = Mail(app)
 
 
 # Useful debugging interceptor to log all values posted to the endpoint
