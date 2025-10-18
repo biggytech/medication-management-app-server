@@ -80,6 +80,7 @@ class PatientReportEmailService:
 
             print('Sending....')
             # Send email with PDF attachment
+
             result = self._send_email_with_pdf(
                 doctor_email=doctor.user.email,
                 doctor_name=doctor.user.full_name,
@@ -88,6 +89,7 @@ class PatientReportEmailService:
                 end_date=end_date,
                 pdf_file_path=pdf_file_path
             )
+
             print('Sent!')
 
             # Clean up temporary PDF file
@@ -96,6 +98,7 @@ class PatientReportEmailService:
             except OSError:
                 pass  # File might already be deleted
 
+            # return None
             return result
 
         except Exception as e:
