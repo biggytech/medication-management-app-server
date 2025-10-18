@@ -65,7 +65,7 @@ class PatientReportGenerator:
                 "taken": "Taken",
                 "skipped": "Skipped",
                 "total": "Total",
-                "compliance_rate": "Compliance Rate",
+                "compliance_rate": "Compliance",
                 "health_tracker_summary": "Health Tracker Summary",
                 "tracker_type": "Tracker Type",
                 "entries": "Entries",
@@ -106,7 +106,7 @@ class PatientReportGenerator:
                 "taken": "Принято",
                 "skipped": "Пропущено",
                 "total": "Всего",
-                "compliance_rate": "Соблюдение режима",
+                "compliance_rate": "Соблюдение",
                 "health_tracker_summary": "Сводка по показателям здоровья",
                 "tracker_type": "Тип показателя",
                 "entries": "Записи",
@@ -165,7 +165,7 @@ class PatientReportGenerator:
             "menstrual_cycle": self._t("menstrual_cycle")
         }
         return type_mapping.get(tracker_type, tracker_type)
-    
+
     def _get_medicine_form_translation(self, form: str) -> str:
         """Get translated medicine form"""
         form_mapping = {
@@ -207,8 +207,8 @@ class PatientReportGenerator:
 
         # Create PDF document
         doc = SimpleDocTemplate(temp_file.name, pagesize=letter,
-                                 rightMargin=36, leftMargin=36,
-                                 topMargin=50, bottomMargin=18)
+                                rightMargin=36, leftMargin=36,
+                                topMargin=50, bottomMargin=18)
 
         # Get styles
         styles = getSampleStyleSheet()
