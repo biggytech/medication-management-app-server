@@ -93,6 +93,10 @@
                 <input type="hidden" id="editDoctorId" name="doctor_id">
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="editSpecialisation" class="form-label">Специализация</label>
                         <input type="text" class="form-control" id="editSpecialisation" name="specialisation" required>
                     </div>
@@ -273,6 +277,7 @@
                 const doctor = doctors.find(d => d.id === doctorId);
                 if (doctor) {
                     $('#editDoctorId').val(doctor.id);
+                    $('#editEmail').val(doctor.user.email);
                     $('#editSpecialisation').val(doctor.specialisation);
                     $('#editPlaceOfWork').val(doctor.place_of_work);
                     $('#editPhone').val(doctor.phone || '');
@@ -293,6 +298,7 @@
     function updateDoctor() {
         const doctorId = $('#editDoctorId').val();
         const formData = new FormData();
+        formData.append('email', $('#editEmail').val());
         formData.append('specialisation', $('#editSpecialisation').val());
         formData.append('place_of_work', $('#editPlaceOfWork').val());
         formData.append('phone', $('#editPhone').val());

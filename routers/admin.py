@@ -297,12 +297,21 @@ def api_update_doctor(doctor_id):
                     return jsonify({'error': 'Недопустимый формат файла. Разрешены: PNG, JPG, JPEG, GIF, WEBP'}), 400
 
         # Get form data
+        email = request.form.get('email')
         specialisation = request.form.get('specialisation')
         place_of_work = request.form.get('place_of_work')
         phone = request.form.get('phone')
 
-        if not all([specialisation, place_of_work]):
+        if not all([email, specialisation, place_of_work]):
             return jsonify({'error': 'Все поля обязательны для заполнения'}), 400
+
+        # Update user email if provided
+        if email and email != doctor.user.email:
+            from models.user.operations.update_user import update_user
+            update_user(
+                user=doctor.user,
+                email=email
+            )
 
         # Update doctor
         updated_doctor = update_doctor(
