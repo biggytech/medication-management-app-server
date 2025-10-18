@@ -51,7 +51,13 @@ class PatientReportEmailService:
         """Format date according to language"""
         if self.language == "ru-RU":
             if format_type == "long":
-                return date_obj.strftime('%d %B %Y')
+                # Use Russian month names
+                month_names = {
+                    1: "января", 2: "февраля", 3: "марта", 4: "апреля",
+                    5: "мая", 6: "июня", 7: "июля", 8: "августа",
+                    9: "сентября", 10: "октября", 11: "ноября", 12: "декабря"
+                }
+                return f"{date_obj.day} {month_names[date_obj.month]} {date_obj.year}"
             else:
                 return date_obj.strftime('%d.%m.%Y')
         else:
@@ -122,11 +128,7 @@ class PatientReportEmailService:
                 end_date=end_date
             )
 
-            print('pdf_file_path', pdf_file_path)
-
-            print('Sending....')
             # Send email with PDF attachment
-
             result = self._send_email_with_pdf(
                 doctor_email=doctor.user.email,
                 doctor_name=doctor.user.full_name,
@@ -136,15 +138,12 @@ class PatientReportEmailService:
                 pdf_file_path=pdf_file_path
             )
 
-            print('Sent!')
-
             # Clean up temporary PDF file
             try:
                 os.unlink(pdf_file_path)
             except OSError:
                 pass  # File might already be deleted
 
-            # return None
             return result
 
         except Exception as e:
@@ -200,8 +199,6 @@ class PatientReportEmailService:
 {self._t("email_signature")}
             """.strip()
 
-            print('doctor_email', doctor_email)
-
             # Create message
             msg = Message(
                 subject=subject,
@@ -218,13 +215,7 @@ class PatientReportEmailService:
                     data=pdf_file.read()
                 )
 
-            print('Started sending!')
-
             # Send email using the app's mail instance
-            # from flask_mail import Mail
-            # mail = Mail(current_app)
-            # mail.send(msg)
-
             from app import mail
             mail.send(msg)
 
