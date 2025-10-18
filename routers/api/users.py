@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 
+from models.user.operations.get_user_by_id import get_user_by_id
 from models.user.operations.update_user import update_user
 from models.user.validations import UpdateUserValidation
 from services.routers.decorators.token_required import token_required
@@ -7,6 +8,12 @@ from services.routers.decorators.validate_request import validate_request, BODY
 
 # Create blueprint for user routes
 api_users = Blueprint('/api/users', __name__)
+
+
+@api_users.route('/profile', methods=['GET'])
+@token_required
+def get_user_profile(user):
+    return jsonify(get_user_by_id(user.id))
 
 
 @api_users.route('/profile', methods=['PUT'])
@@ -24,10 +31,7 @@ def update_user_profile(user):
         # Update the user
         result = update_user(user, **user_data)
 
-        return jsonify({
-            'message': 'User profile updated successfully',
-            'user': result
-        }), 200
+        return jsonify(result), 200
 
     except Exception as e:
         return jsonify({

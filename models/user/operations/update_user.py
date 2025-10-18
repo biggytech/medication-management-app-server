@@ -1,8 +1,9 @@
-from services.auth.generate_token import generate_token
-from models.user.user import User
 from werkzeug.security import generate_password_hash
+
 from models.user.operations.get_user_by_id import get_user_by_id
+from models.user.user import User
 from services.db.decorators.with_session import with_session
+
 
 @with_session
 def update_user(session, user, **user_data):
@@ -15,25 +16,16 @@ def update_user(session, user, **user_data):
 
     # Only hash password if it's being updated
     if 'password' in user_data and user_data['password']:
-        hashed_password = generate_password_hash(user_data['password'], method="pbkdf2") # "pbkdf2" for MacOS
+        hashed_password = generate_password_hash(user_data['password'], method="pbkdf2")  # "pbkdf2" for MacOS
         user_data['password'] = hashed_password
 
     # Filter out None values to avoid overwriting with None
     filtered_data = {k: v for k, v in user_data.items() if v is not None}
-    
-    session.query(User).filter(User.id == user.id).update(filtered_data)
 
-    token = generate_token(user)
+    session.query(User).filter(User.id == user.id).update(filtered_data)
 
     session.commit()
 
     updated_user = get_user_by_id(user.id)
 
-    return {
-        "id": updated_user.id,
-        "token": token,
-        "full_name": updated_user.full_name,
-        "email": updated_user.email,
-        "sex": updated_user.sex,
-        "date_of_birth": updated_user.date_of_birth.isoformat() if updated_user.date_of_birth else None
-    }
+    return updated_user
