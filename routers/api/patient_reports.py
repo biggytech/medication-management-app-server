@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request, send_file
 
+from models.doctor.operations.get_doctor_by_user_id import get_doctor_by_user_id
 from models.health_tracker_log.operations.get_health_tracker_logs_by_date_range import \
     get_health_tracker_logs_by_date_range
 from models.medication_log.operations.get_medication_logs_by_date_range import get_medication_logs_by_date_range
@@ -181,6 +182,104 @@ def send_patient_report_email(user):
         email_service = PatientReportEmailService(language=language)
         result = email_service.send_patient_report_to_doctor(
             doctor_id=doctor_id,
+            patient_user_id=patient_user_id,
+            start_date=start_date,
+            end_date=end_date,
+            language=language
+        )
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': result['message']
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': result['error']
+            }), 400
+
+    except ValueError as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to send report: {str(e)}'
+        }), 500
+
+
+@api_patient_reports.route('/send-to-doctor', methods=['POST'])
+@token_required
+def send_patient_report_to_doctor(user):
+    """
+    Send a patient report PDF via email to the current user (doctor).
+    The current user must be a doctor, and they will receive the report for the specified patient.
+    
+    Request Body:
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+        user_id: ID of the patient user to generate report for
+        language: Language for the report (en-US or ru-RU, default: en-US)
+    
+    Returns:
+        JSON response with success status and message
+    """
+    try:
+        # Get validated request data
+        validated_data = request.json
+
+        start_date_str = validated_data['start_date']
+        end_date_str = validated_data['end_date']
+        patient_user_id = int(validated_data['user_id'])
+        language = validated_data.get('language', 'en-US')
+
+        # Validate language
+        if language not in ['en-US', 'ru-RU']:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid language. Supported languages: en-US, ru-RU'
+            }), 400
+
+        # Parse dates
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid date format. Use YYYY-MM-DD format'
+            }), 400
+
+        # Validate date range
+        if start_date > end_date:
+            return jsonify({
+                'success': False,
+                'error': 'Start date must be before or equal to end date'
+            }), 400
+
+        # Verify current user is a doctor
+        doctor = get_doctor_by_user_id(user_id=user.id)
+        if not doctor:
+            return jsonify({
+                'success': False,
+                'error': 'Current user is not a doctor'
+            }), 403
+
+        # Verify patient user exists
+        patient_user = get_user_by_id(user_id=patient_user_id)
+        if not patient_user:
+            return jsonify({
+                'success': False,
+                'error': 'Patient user not found'
+            }), 404
+
+        # Send email with patient report to the doctor
+        email_service = PatientReportEmailService(language=language)
+        result = email_service.send_patient_report_to_doctor(
+            doctor_id=doctor.id,
             patient_user_id=patient_user_id,
             start_date=start_date,
             end_date=end_date,
