@@ -3,6 +3,8 @@ from flask import Blueprint, jsonify, request
 from models.patient.operations.create_patient import create_patient
 from models.patient.operations.delete_patient import delete_patient
 from models.patient.operations.get_patients_by_user_id import get_patients_by_user_id
+from models.patient.operations.get_patients_by_doctor_id import get_patients_by_doctor_id
+from models.doctor.operations.get_doctor_by_user_id import get_doctor_by_user_id
 from models.patient.validations import PatientCreateRequest, PatientResponse, RemoveDoctorRequest
 from services.routers.decorators.token_required import token_required
 from services.routers.decorators.validate_request import validate_request, BODY
@@ -170,6 +172,56 @@ def remove_doctor(user):
         return jsonify({
             'success': True,
             'message': 'Successfully removed doctor'
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@api_patients.route('/', methods=['GET'])
+@token_required
+def get_patients_for_doctor(user):
+    """
+    Get all patients for the current user's doctor.
+    This endpoint is for doctors to see their patients.
+    
+    Returns:
+        JSON response with list of user models for the doctor's patients
+    """
+    try:
+        # Get the current user's doctor information
+        doctor = get_doctor_by_user_id(user_id=user.id)
+        
+        if not doctor:
+            return jsonify({
+                'success': False,
+                'error': 'User is not a doctor'
+            }), 403
+
+        # Get all patients for this doctor
+        patients = get_patients_by_doctor_id(doctor_id=doctor.id)
+
+        # Extract user models from patient relationships
+        users_data = []
+        for patient in patients:
+            user_data = {
+                'id': patient.user.id,
+                'uuid': str(patient.user.uuid),
+                'full_name': patient.user.full_name,
+                'email': patient.user.email,
+                'is_guest': patient.user.is_guest,
+                'sex': patient.user.sex,
+                'date_of_birth': patient.user.date_of_birth.isoformat() if patient.user.date_of_birth else None
+            }
+            users_data.append(user_data)
+
+        return jsonify({
+            'success': True,
+            'patients': users_data,
+            'total': len(users_data)
         }), 200
 
     except Exception as e:
