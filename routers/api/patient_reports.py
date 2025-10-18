@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request, send_file
-from pydantic import BaseModel, Field
 
 from models.health_tracker_log.operations.get_health_tracker_logs_by_date_range import \
     get_health_tracker_logs_by_date_range
@@ -14,17 +13,17 @@ from services.routers.decorators.token_required import token_required
 api_patient_reports = Blueprint('/api/patient-reports', __name__)
 
 
-class PatientReportRequest(BaseModel):
-    """Validation schema for patient report request"""
-    start_date: str = Field(..., description="Start date in YYYY-MM-DD format")
-    end_date: str = Field(..., description="End date in YYYY-MM-DD format")
-    user_id: int = Field(..., description="ID of the patient user")
-    language: str = Field(default="en-US", description="Language for the report (en-US or ru-RU)")
+# class PatientReportRequest(BaseModel):
+#     """Validation schema for patient report request"""
+#     start_date: str = Field(..., description="Start date in YYYY-MM-DD format")
+#     end_date: str = Field(..., description="End date in YYYY-MM-DD format")
+#     user_id: int = Field(..., description="ID of the patient user")
+#     language: str = Field(default="en-US", description="Language for the report (en-US or ru-RU)")
 
 
 @api_patient_reports.route('/generate', methods=['GET'])
-# @token_required
-def generate_patient_report():
+@token_required
+def generate_patient_report(user):
     """
     Generate a PDF report for a patient with medication and health tracking data.
     
@@ -43,7 +42,8 @@ def generate_patient_report():
 
         start_date_str = validated_data['start_date']
         end_date_str = validated_data['end_date']
-        patient_user_id = int(validated_data['user_id'])
+        # patient_user_id = int(validated_data['user_id'])
+        patient_user_id = user.id
         language = validated_data.get('language', 'en-US')
 
         # Validate language
