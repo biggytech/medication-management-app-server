@@ -6,8 +6,8 @@ from models.health_tracker_log.operations.get_health_tracker_logs_by_date_range 
     get_health_tracker_logs_by_date_range
 from models.medication_log.operations.get_medication_logs_by_date_range import get_medication_logs_by_date_range
 from models.user.operations.get_user_by_id import get_user_by_id
-from services.pdf.generate_patient_report import PatientReportGenerator
 from services.email.send_patient_report import PatientReportEmailService
+from services.pdf.generate_patient_report import PatientReportGenerator
 from services.routers.decorators.token_required import token_required
 
 # Create Blueprint for patient reports API
@@ -145,7 +145,7 @@ def send_patient_report_email(user):
     """
     try:
         # Get validated query parameters
-        validated_data = request.args
+        validated_data = request.json
 
         start_date_str = validated_data['start_date']
         end_date_str = validated_data['end_date']
@@ -207,6 +207,63 @@ def send_patient_report_email(user):
         return jsonify({
             'success': False,
             'error': f'Failed to send report: {str(e)}'
+        }), 500
+
+
+@api_patient_reports.route('/test-email-config', methods=['GET'])
+@token_required
+def test_email_config(user):
+    """
+    Test email configuration and return current settings.
+    This endpoint helps debug email configuration issues.
+    
+    Returns:
+        JSON response with email configuration status
+    """
+    try:
+        from flask import current_app
+
+        # Get email configuration
+        config = {
+            'MAIL_SERVER': current_app.config.get('MAIL_SERVER'),
+            'MAIL_PORT': current_app.config.get('MAIL_PORT'),
+            'MAIL_USE_TLS': current_app.config.get('MAIL_USE_TLS'),
+            'MAIL_USE_SSL': current_app.config.get('MAIL_USE_SSL'),
+            'MAIL_USERNAME': current_app.config.get('MAIL_USERNAME'),
+            'MAIL_PASSWORD': '***' if current_app.config.get('MAIL_PASSWORD') else None,
+            'MAIL_DEFAULT_SENDER': current_app.config.get('MAIL_DEFAULT_SENDER')
+        }
+
+        # Check if required settings are present
+        missing_required = []
+        if not config['MAIL_USERNAME']:
+            missing_required.append('MAIL_USERNAME')
+        if not current_app.config.get('MAIL_PASSWORD'):
+            missing_required.append('MAIL_PASSWORD')
+
+        if missing_required:
+            return jsonify({
+                'success': False,
+                'error': f'Missing required email configuration: {", ".join(missing_required)}',
+                'config': config,
+                'setup_instructions': {
+                    'required_env_vars': ['MAIL_USERNAME', 'MAIL_PASSWORD'],
+                    'optional_env_vars': ['MAIL_SERVER', 'MAIL_PORT', 'MAIL_USE_TLS', 'MAIL_USE_SSL',
+                                          'MAIL_DEFAULT_SENDER'],
+                    'example': 'MAIL_USERNAME=your-email@gmail.com MAIL_PASSWORD=your-app-password'
+                }
+            }), 400
+
+        return jsonify({
+            'success': True,
+            'message': 'Email configuration looks good',
+            'config': config
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to check email configuration: {str(e)}'
         }), 500
 
 
