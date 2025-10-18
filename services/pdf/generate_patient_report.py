@@ -79,7 +79,14 @@ class PatientReportGenerator:
                 "page": "Page",
                 "of": "of",
                 "no_medication_data": "No medication data available for this period.",
-                "no_health_tracker_data": "No health tracker data available for this period."
+                "no_health_tracker_data": "No health tracker data available for this period.",
+                "tablet": "Tablet",
+                "injection": "Injection",
+                "solution": "Solution",
+                "drops": "Drops",
+                "inhaler": "Inhaler",
+                "powder": "Powder",
+                "other": "Other"
             },
             "ru-RU": {
                 "title": "Медицинский отчет пациента",
@@ -113,7 +120,14 @@ class PatientReportGenerator:
                 "page": "Страница",
                 "of": "из",
                 "no_medication_data": "Данные о лекарствах за этот период отсутствуют.",
-                "no_health_tracker_data": "Данные о показателях здоровья за этот период отсутствуют."
+                "no_health_tracker_data": "Данные о показателях здоровья за этот период отсутствуют.",
+                "tablet": "Таблетка",
+                "injection": "Инъекция",
+                "solution": "Раствор",
+                "drops": "Капли",
+                "inhaler": "Ингалятор",
+                "powder": "Порошок",
+                "other": "Другое"
             }
         }
 
@@ -151,6 +165,19 @@ class PatientReportGenerator:
             "menstrual_cycle": self._t("menstrual_cycle")
         }
         return type_mapping.get(tracker_type, tracker_type)
+    
+    def _get_medicine_form_translation(self, form: str) -> str:
+        """Get translated medicine form"""
+        form_mapping = {
+            "tablet": self._t("tablet"),
+            "injection": self._t("injection"),
+            "solution": self._t("solution"),
+            "drops": self._t("drops"),
+            "inhaler": self._t("inhaler"),
+            "powder": self._t("powder"),
+            "other": self._t("other")
+        }
+        return form_mapping.get(form, form)
 
     def _create_header_footer(self, canvas, doc):
         """Create header and footer for each page"""
@@ -180,8 +207,8 @@ class PatientReportGenerator:
 
         # Create PDF document
         doc = SimpleDocTemplate(temp_file.name, pagesize=letter,
-                                rightMargin=72, leftMargin=72,
-                                topMargin=72, bottomMargin=18)
+                                 rightMargin=36, leftMargin=36,
+                                 topMargin=50, bottomMargin=18)
 
         # Get styles
         styles = getSampleStyleSheet()
@@ -239,7 +266,7 @@ class PatientReportGenerator:
             [self._t("sex"), self._get_sex_translation(user.sex) if user.sex else "N/A"]
         ]
 
-        patient_table = Table(patient_data, colWidths=[2 * inch, 4 * inch])
+        patient_table = Table(patient_data, colWidths=[2.5 * inch, 5.5 * inch])
         patient_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
@@ -262,7 +289,7 @@ class PatientReportGenerator:
             [self._t("to"), self._format_date(end_date)]
         ]
 
-        period_table = Table(period_data, colWidths=[2 * inch, 4 * inch])
+        period_table = Table(period_data, colWidths=[2.5 * inch, 5.5 * inch])
         period_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
@@ -287,7 +314,7 @@ class PatientReportGenerator:
             medicine = log.medicine
             if medicine.title not in medication_stats:
                 medication_stats[medicine.title] = {
-                    'form': medicine.form,
+                    'form': self._get_medicine_form_translation(medicine.form),
                     'taken': 0,
                     'skipped': 0
                 }
@@ -315,7 +342,7 @@ class PatientReportGenerator:
                     compliance_rate
                 ])
 
-            med_table = Table(med_data, colWidths=[1.5 * inch, 1 * inch, 0.8 * inch, 0.8 * inch, 0.8 * inch, 1 * inch])
+            med_table = Table(med_data, colWidths=[2.5 * inch, 1.5 * inch, 1 * inch, 1 * inch, 1 * inch, 1.5 * inch])
             med_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -380,7 +407,7 @@ class PatientReportGenerator:
                     avg_value_str
                 ])
 
-            tracker_table = Table(tracker_data, colWidths=[2.5 * inch, 1.5 * inch, 2 * inch])
+            tracker_table = Table(tracker_data, colWidths=[3.5 * inch, 2 * inch, 3 * inch])
             tracker_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
