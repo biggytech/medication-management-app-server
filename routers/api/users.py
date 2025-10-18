@@ -13,7 +13,12 @@ api_users = Blueprint('/api/users', __name__)
 @api_users.route('/profile', methods=['GET'])
 @token_required
 def get_user_profile(user):
-    return jsonify(get_user_by_id(user.id))
+    user = get_user_by_id(user.id)
+    user_dict = user.as_dict()
+
+    print(user_dict)
+
+    return user_dict
 
 
 @api_users.route('/profile', methods=['PUT'])
@@ -31,7 +36,13 @@ def update_user_profile(user):
         # Update the user
         result = update_user(user, **user_data)
 
-        return jsonify(result), 200
+        user = get_user_by_id(user.id)
+        user_dict = user.as_dict()
+
+        print(user_dict)
+
+        return user_dict
+
 
     except Exception as e:
         return jsonify({
