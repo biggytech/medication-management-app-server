@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, desc
 from models.chat_message.chat_message import ChatMessage
 from models.user.user import User
+from models.doctor.doctor import Doctor
 from typing import List, Dict
 from services.db.decorators.with_session import with_session
 
@@ -48,6 +49,10 @@ def get_user_conversations(session: Session, user_id: int) -> List[Dict]:
     users = session.query(User).filter(User.id.in_(other_user_ids)).all()
     user_dict = {user.id: user for user in users}
     
+    # Get doctor information for users who are doctors
+    doctors = session.query(Doctor).filter(Doctor.user_id.in_(other_user_ids)).all()
+    doctor_dict = {doctor.user_id: doctor for doctor in doctors}
+    
     # Calculate unread counts and format results
     result = []
     for other_user_id, conv_data in conversations_dict.items():
@@ -67,12 +72,17 @@ def get_user_conversations(session: Session, user_id: int) -> List[Dict]:
             )
         ).count()
         
+        # Check if this user is a doctor and has a photo
+        doctor = doctor_dict.get(other_user_id)
+        photo_url = doctor.photo_url if doctor and doctor.photo_url else None
+        
         result.append({
             'other_user_id': other_user_id,
             'other_user_name': other_user.full_name,
             'last_message': conv_data['last_message'].message,
             'last_message_time': conv_data['last_message'].created_at.isoformat(),
-            'unread_count': unread_count
+            'unread_count': unread_count,
+            'photo_url': photo_url
         })
     
     # Sort by last message time (newest first)
