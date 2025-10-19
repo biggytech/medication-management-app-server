@@ -8,6 +8,7 @@ from flask_mail import Mail
 load_dotenv()
 
 from routers.admin import admin
+from routers.api.chat_messages import api_chat_messages
 from routers.api.doctors import api_doctors
 from routers.api.health_tracker_logs import api_health_tracker_logs
 from routers.api.health_trackers import api_health_trackers
@@ -116,6 +117,7 @@ def serve_uploaded_file(filename):
 
 
 app.register_blueprint(admin, url_prefix='/admin')
+app.register_blueprint(api_chat_messages, url_prefix='/api/chat-messages')
 app.register_blueprint(api_doctors, url_prefix='/api/doctors')
 app.register_blueprint(api_patients, url_prefix='/api/patients')
 app.register_blueprint(api_patient_reports, url_prefix='/api/patient-reports')
