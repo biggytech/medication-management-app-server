@@ -7,7 +7,6 @@ from models.chat_message.operations.get_user_conversations import get_user_conve
 from models.chat_message.operations.update_chat_message import update_chat_message, mark_messages_as_read
 from models.chat_message.validations import ChatMessageCreate, ChatMessageUpdate
 from services.routers.decorators.token_required import token_required
-from services.routers.decorators.validate_request import validate_request, BODY
 
 api_chat_messages = Blueprint('/api/chat-messages', __name__)
 
@@ -48,13 +47,13 @@ def get_conversation_messages(user, other_user_id):
         for message in messages:
             user_ids.add(message.sender_id)
             user_ids.add(message.receiver_id)
-        
+
         users = {}
         for user_id in user_ids:
             user = get_user_by_id(user_id)
             if user:
                 users[user_id] = user.full_name
-        
+
         # Format messages with user names
         formatted_messages = []
         for message in messages:
@@ -62,10 +61,13 @@ def get_conversation_messages(user, other_user_id):
             message_data['sender_name'] = users.get(message.sender_id)
             message_data['receiver_name'] = users.get(message.receiver_id)
             formatted_messages.append(message_data)
-        
+
+        other_user = get_user_by_id(other_user_id)
+
         return jsonify({
             'success': True,
-            'data': formatted_messages
+            'data': formatted_messages,
+            'other_user': other_user
         }), 200
     except Exception as e:
         return jsonify({
@@ -86,21 +88,21 @@ def send_message(user):
                 'success': False,
                 'error': 'Request body is required'
             }), 400
-        
+
         # Create Pydantic model for validation
         validated_data = ChatMessageCreate(**data)
-        
+
         message = create_chat_message(validated_data, user.id)
-        
+
         # Get user names for the response
         from models.user.operations.get_user_by_id import get_user_by_id
         sender = get_user_by_id(user.id)
         receiver = get_user_by_id(validated_data.receiver_id)
-        
+
         response_data = message.as_dict()
         response_data['sender_name'] = sender.full_name if sender else None
         response_data['receiver_name'] = receiver.full_name if receiver else None
-        
+
         return jsonify({
             'success': True,
             'data': response_data
@@ -135,11 +137,11 @@ def get_message(user, message_id):
         from models.user.operations.get_user_by_id import get_user_by_id
         sender = get_user_by_id(message.sender_id)
         receiver = get_user_by_id(message.receiver_id)
-        
+
         response_data = message.as_dict()
         response_data['sender_name'] = sender.full_name if sender else None
         response_data['receiver_name'] = receiver.full_name if receiver else None
-        
+
         return jsonify({
             'success': True,
             'data': response_data
@@ -163,10 +165,10 @@ def update_message(user, message_id):
                 'success': False,
                 'error': 'Request body is required'
             }), 400
-        
+
         # Create Pydantic model for validation
         validated_data = ChatMessageUpdate(**data)
-        
+
         message = get_chat_messages_by_id(message_id)
         if not message:
             return jsonify({
@@ -182,16 +184,16 @@ def update_message(user, message_id):
             }), 403
 
         updated_message = update_chat_message(message_id, validated_data)
-        
+
         # Get user names for the response
         from models.user.operations.get_user_by_id import get_user_by_id
         sender = get_user_by_id(updated_message.sender_id)
         receiver = get_user_by_id(updated_message.receiver_id)
-        
+
         response_data = updated_message.as_dict()
         response_data['sender_name'] = sender.full_name if sender else None
         response_data['receiver_name'] = receiver.full_name if receiver else None
-        
+
         return jsonify({
             'success': True,
             'data': response_data
