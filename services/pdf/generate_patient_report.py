@@ -17,17 +17,12 @@ from models.user.user import User
 
 
 class PatientReportGenerator:
-    """Generates professional medical reports for patients"""
-
     def __init__(self, language: str = "en-US"):
         self.language = language
         self.translations = self._get_translations()
         self._register_fonts()
 
     def _register_fonts(self):
-        """Register fonts that support Cyrillic characters"""
-        # For now, we'll rely on ReportLab's built-in Unicode support
-        # The issue might be with how we're handling the text encoding
         pdfmetrics.registerFont(TTFont('DejaVuSerif', 'DejaVuSerif.ttf', 'UTF-8'))
         pdfmetrics.registerFont(TTFont('DejaVuSerif-Bold', 'DejaVuSerif-Bold.ttf', 'UTF-8'))
         pass
@@ -39,13 +34,11 @@ class PatientReportGenerator:
         return "DejaVuSerif-Bold"
 
     def _ensure_unicode(self, text):
-        """Ensure text is properly encoded as Unicode"""
         if isinstance(text, bytes):
             return text.decode('utf-8')
         return str(text)
 
     def _get_translations(self) -> Dict[str, Dict[str, str]]:
-        """Get translations for different languages"""
         return {
             "en-US": {
                 "title": "Patient Medical Report",
@@ -132,16 +125,13 @@ class PatientReportGenerator:
         }
 
     def _t(self, key: str) -> str:
-        """Get translation for current language"""
         return self.translations.get(self.language, self.translations["en-US"]).get(key, key)
 
     def _calculate_age(self, date_of_birth: date) -> int:
-        """Calculate age from date of birth"""
         today = date.today()
         return today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
 
     def _format_date(self, date_obj: datetime) -> str:
-        """Format date according to language"""
         if self.language == "ru-RU":
             return date_obj.strftime("%d.%m.%Y")
         else:
@@ -156,7 +146,6 @@ class PatientReportGenerator:
         return sex
 
     def _get_tracker_type_translation(self, tracker_type: str) -> str:
-        """Get translated tracker type"""
         type_mapping = {
             "blood_pressure": self._t("blood_pressure"),
             "heart_rate": self._t("heart_rate"),
@@ -167,7 +156,6 @@ class PatientReportGenerator:
         return type_mapping.get(tracker_type, tracker_type)
 
     def _get_medicine_form_translation(self, form: str) -> str:
-        """Get translated medicine form"""
         form_mapping = {
             "tablet": self._t("tablet"),
             "injection": self._t("injection"),
@@ -180,7 +168,6 @@ class PatientReportGenerator:
         return form_mapping.get(form, form)
 
     def _create_header_footer(self, canvas, doc):
-        """Create header and footer for each page"""
         canvas.saveState()
 
         # Header
@@ -188,7 +175,6 @@ class PatientReportGenerator:
         title_text = self._ensure_unicode(self._t("title"))
         canvas.drawCentredString(letter[0] / 2, letter[1] - 50, title_text)
 
-        # Footer with page number
         canvas.setFont(self._get_font_name(), 10)
         page_num = canvas.getPageNumber()
         footer_text = self._ensure_unicode(self._t('page') + " " + str(page_num))
@@ -199,21 +185,16 @@ class PatientReportGenerator:
     def generate_report(self, user: User, medication_logs: List[MedicationLog],
                         health_tracker_logs: List[HealthTrackerLog],
                         start_date: datetime, end_date: datetime) -> str:
-        """Generate PDF report and return file path"""
 
-        # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
         temp_file.close()
 
-        # Create PDF document
         doc = SimpleDocTemplate(temp_file.name, pagesize=letter,
                                 rightMargin=36, leftMargin=36,
                                 topMargin=50, bottomMargin=18)
 
-        # Get styles
         styles = getSampleStyleSheet()
 
-        # Create custom styles
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
@@ -244,19 +225,15 @@ class PatientReportGenerator:
             textColor=colors.black
         )
 
-        # Build content
         story = []
 
-        # Title
         title_text = self._ensure_unicode(self._t("title"))
         story.append(Paragraph(title_text, title_style))
         story.append(Spacer(1, 20))
 
-        # Patient Information
         patient_info_text = self._ensure_unicode(self._t("patient_info"))
         story.append(Paragraph(patient_info_text, heading_style))
 
-        # Calculate age
         age = self._calculate_age(user.date_of_birth) if user.date_of_birth else "N/A"
 
         patient_data = [
@@ -281,7 +258,6 @@ class PatientReportGenerator:
         story.append(patient_table)
         story.append(Spacer(1, 20))
 
-        # Report Period
         report_period_text = self._ensure_unicode(self._t("report_period"))
         story.append(Paragraph(report_period_text, heading_style))
         period_data = [
@@ -304,11 +280,9 @@ class PatientReportGenerator:
         story.append(period_table)
         story.append(Spacer(1, 20))
 
-        # Medication Summary
         medication_summary_text = self._ensure_unicode(self._t("medication_summary"))
         story.append(Paragraph(medication_summary_text, heading_style))
 
-        # Process medication data
         medication_stats = {}
         for log in medication_logs:
             medicine = log.medicine
@@ -324,7 +298,6 @@ class PatientReportGenerator:
             elif log.type == 'skipped':
                 medication_stats[medicine.title]['skipped'] += 1
 
-        # Create medication table
         if medication_stats:
             med_data = [
                 [self._t("medication_name"), self._t("form"), self._t("taken"), self._t("skipped"), self._t("total"),
@@ -363,11 +336,9 @@ class PatientReportGenerator:
 
         story.append(Spacer(1, 20))
 
-        # Health Tracker Summary
         health_tracker_summary_text = self._ensure_unicode(self._t("health_tracker_summary"))
         story.append(Paragraph(health_tracker_summary_text, heading_style))
 
-        # Process health tracker data
         tracker_stats = {}
         for log in health_tracker_logs:
             tracker = log.health_tracker
@@ -387,7 +358,6 @@ class PatientReportGenerator:
                 tracker_stats[tracker_type]['total_value2'] += log.value2
                 tracker_stats[tracker_type]['has_value2'] = True
 
-        # Create health tracker table
         if tracker_stats:
             tracker_data = [[self._t("tracker_type"), self._t("entries"), self._t("average_value")]]
 
@@ -426,7 +396,6 @@ class PatientReportGenerator:
             no_health_tracker_text = self._ensure_unicode(self._t("no_health_tracker_data"))
             story.append(Paragraph(no_health_tracker_text, normal_style))
 
-        # Add generation timestamp
         story.append(Spacer(1, 30))
         timestamp_style = ParagraphStyle(
             'Timestamp',
@@ -438,7 +407,6 @@ class PatientReportGenerator:
             self._t('generated_on') + ": " + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         story.append(Paragraph(timestamp_text, timestamp_style))
 
-        # Build PDF
         doc.build(story, onFirstPage=self._create_header_footer, onLaterPages=self._create_header_footer)
 
         return temp_file.name

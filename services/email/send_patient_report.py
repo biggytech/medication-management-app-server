@@ -14,7 +14,6 @@ from services.pdf.generate_patient_report import PatientReportGenerator
 
 
 class PatientReportEmailService:
-    """Service for sending patient reports via email to doctors"""
 
     def __init__(self, language: str = "en-US"):
         from flask_mail import Mail
@@ -23,7 +22,6 @@ class PatientReportEmailService:
         self.translations = self._get_translations()
 
     def _get_translations(self) -> Dict[str, Dict[str, str]]:
-        """Get translations for email content in different languages"""
         return {
             "en-US": {
                 "email_subject": "Patient Report - {patient_name} ({start_date} to {end_date})",
@@ -44,14 +42,11 @@ class PatientReportEmailService:
         }
 
     def _t(self, key: str) -> str:
-        """Get translation for current language"""
         return self.translations.get(self.language, self.translations["en-US"]).get(key, key)
 
     def _format_date(self, date_obj: datetime, format_type: str = "short") -> str:
-        """Format date according to language"""
         if self.language == "ru-RU":
             if format_type == "long":
-                # Use Russian month names
                 month_names = {
                     1: "января", 2: "февраля", 3: "марта", 4: "апреля",
                     5: "мая", 6: "июня", 7: "июля", 8: "августа",
@@ -69,26 +64,11 @@ class PatientReportEmailService:
     def send_patient_report_to_doctor(self, doctor_id: int, patient_user_id: int,
                                       start_date: datetime, end_date: datetime,
                                       language: str = "en-US") -> dict:
-        """
-        Send a patient report PDF to a doctor's email.
-        
-        Args:
-            doctor_id: ID of the doctor to send the report to
-            patient_user_id: ID of the patient user
-            start_date: Start date for the report
-            end_date: End date for the report
-            language: Language for the report (en-US or ru-RU)
-            
-        Returns:
-            dict: Result with success status and message
-        """
         try:
-            # Update language if different from initialization
             if language != self.language:
                 self.language = language
                 self.translations = self._get_translations()
 
-            # Get doctor information
             doctor = get_doctor_by_id(doctor_id=doctor_id)
             if not doctor:
                 return {
@@ -96,7 +76,6 @@ class PatientReportEmailService:
                     'error': 'Doctor not found'
                 }
 
-            # Get patient user data
             patient_user = get_user_by_id(user_id=patient_user_id)
             if not patient_user:
                 return {
@@ -104,21 +83,18 @@ class PatientReportEmailService:
                     'error': 'Patient user not found'
                 }
 
-            # Get medication logs for the date range
             medication_logs = get_medication_logs_by_date_range(
                 user_id=patient_user_id,
                 start_date=start_date,
                 end_date=end_date
             )
 
-            # Get health tracker logs for the date range
             health_tracker_logs = get_health_tracker_logs_by_date_range(
                 user_id=patient_user_id,
                 start_date=start_date,
                 end_date=end_date
             )
 
-            # Generate PDF report
             pdf_generator = PatientReportGenerator(language=language)
             pdf_file_path = pdf_generator.generate_report(
                 user=patient_user,
@@ -128,7 +104,6 @@ class PatientReportEmailService:
                 end_date=end_date
             )
 
-            # Send email with PDF attachment
             result = self._send_email_with_pdf(
                 doctor_email=doctor.user.email,
                 doctor_name=doctor.user.full_name,
@@ -138,16 +113,14 @@ class PatientReportEmailService:
                 pdf_file_path=pdf_file_path
             )
 
-            # Clean up temporary PDF file
             try:
                 os.unlink(pdf_file_path)
             except OSError:
-                pass  # File might already be deleted
+                pass
 
             return result
 
         except Exception as e:
-            # Log the specific error for debugging
             current_app.logger.error(f"Patient report email failed: {str(e)}")
             current_app.logger.error(f"Doctor ID: {doctor_id}, Patient ID: {patient_user_id}")
 
@@ -159,35 +132,18 @@ class PatientReportEmailService:
     def _send_email_with_pdf(self, doctor_email: str, doctor_name: str,
                              patient_name: str, start_date: datetime,
                              end_date: datetime, pdf_file_path: str) -> dict:
-        """
-        Send email with PDF attachment to doctor.
-        
-        Args:
-            doctor_email: Doctor's email address
-            doctor_name: Doctor's full name
-            patient_name: Patient's full name
-            start_date: Report start date
-            end_date: Report end date
-            pdf_file_path: Path to the generated PDF file
-            
-        Returns:
-            dict: Result with success status and message
-        """
         try:
-            # Format dates according to language
             start_date_str = self._format_date(start_date, "short")
             end_date_str = self._format_date(end_date, "short")
             start_date_long = self._format_date(start_date, "long")
             end_date_long = self._format_date(end_date, "long")
 
-            # Create email message with translations
             subject = self._t("email_subject").format(
                 patient_name=patient_name,
                 start_date=start_date_str,
                 end_date=end_date_str
             )
 
-            # Create email body with translations
             body = f"""{self._t("email_greeting").format(doctor_name=doctor_name)}
 
 {self._t("email_body_intro").format(patient_name=patient_name, start_date=start_date_long, end_date=end_date_long)}
@@ -199,7 +155,6 @@ class PatientReportEmailService:
 {self._t("email_signature")}
             """.strip()
 
-            # Create message
             msg = Message(
                 subject=subject,
                 recipients=[doctor_email],
@@ -207,7 +162,6 @@ class PatientReportEmailService:
                 sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@medicationapp.com')
             )
 
-            # Attach PDF file
             with open(pdf_file_path, 'rb') as pdf_file:
                 msg.attach(
                     filename=f"patient_report_{patient_name}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf",
@@ -215,7 +169,6 @@ class PatientReportEmailService:
                     data=pdf_file.read()
                 )
 
-            # Send email using the app's mail instance
             from app import mail
             mail.send(msg)
 
@@ -225,7 +178,6 @@ class PatientReportEmailService:
             }
 
         except Exception as e:
-            # Log the specific error for debugging
             current_app.logger.error(f"Email sending failed: {str(e)}")
             current_app.logger.error(
                 f"Email config - Server: {current_app.config.get('MAIL_SERVER')}, Port: {current_app.config.get('MAIL_PORT')}, Username: {current_app.config.get('MAIL_USERNAME')}")
