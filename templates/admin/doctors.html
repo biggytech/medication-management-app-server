@@ -12,6 +12,23 @@
 
 <div class="card">
     <div class="card-body">
+        <!-- Search Bar -->
+        <div class="mb-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Поиск по имени, email, специализации, месту работы...">
+                        <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                            <i class="fas fa-search"></i> Поиск
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Очистить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="table-responsive">
             <table class="table table-striped table-hover" id="doctorsTable">
                 <thead>
@@ -31,6 +48,16 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" id="paginationNav" style="display: none;">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+        
+        <!-- Results info -->
+        <div class="text-center text-muted mt-2" id="resultsInfo"></div>
     </div>
 </div>
 
@@ -133,6 +160,11 @@
 
 {% block scripts %}
 <script>
+    // Global state
+    let currentPage = 1;
+    let currentSearch = '';
+    const perPage = 10;
+
     $(document).ready(function() {
         loadDoctors();
         loadUsersForDoctor();
@@ -148,56 +180,176 @@
             e.preventDefault();
             updateDoctor();
         });
+        
+        // Search functionality
+        $('#searchBtn').on('click', function() {
+            currentSearch = $('#searchInput').val().trim();
+            currentPage = 1;
+            loadDoctors();
+        });
+        
+        // Clear search
+        $('#clearSearchBtn').on('click', function() {
+            $('#searchInput').val('');
+            currentSearch = '';
+            currentPage = 1;
+            loadDoctors();
+        });
+        
+        // Search on Enter key
+        $('#searchInput').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $('#searchBtn').click();
+            }
+        });
     });
 
     function loadDoctors() {
-        $.get('/admin/api/doctors')
-            .done(function(doctors) {
+        const params = {
+            page: currentPage,
+            per_page: perPage
+        };
+        
+        if (currentSearch) {
+            params.search = currentSearch;
+        }
+        
+        $.get('/admin/api/doctors', params)
+            .done(function(response) {
                 const tbody = $('#doctorsTable tbody');
                 tbody.empty();
 
-                doctors.forEach(function(doctor) {
-                    const photoCell = doctor.photo_url 
-                        ? `<img src="${doctor.photo_url}" alt="Фото врача" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">`
-                        : '<div style="width: 40px; height: 40px; background-color: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user-md text-muted"></i></div>';
-                    
-                    const row = `
-                        <tr>
-                            <td>${doctor.id}</td>
-                            <td>${photoCell}</td>
-                            <td>${doctor.user.full_name}</td>
-                            <td>${doctor.user.email}</td>
-                            <td>${doctor.specialisation}</td>
-                            <td>${doctor.place_of_work}</td>
-                            <td>${doctor.phone || '-'}</td>
-                            <td class="table-actions">
-                                <div class="btn-group-actions">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editDoctor(${doctor.id})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteDoctor(${doctor.id})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.append(row);
-                });
+                if (response.items && response.items.length > 0) {
+                    response.items.forEach(function(doctor) {
+                        const photoCell = doctor.photo_url 
+                            ? `<img src="${doctor.photo_url}" alt="Фото врача" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">`
+                            : '<div style="width: 40px; height: 40px; background-color: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user-md text-muted"></i></div>';
+                        
+                        const row = `
+                            <tr>
+                                <td>${doctor.id}</td>
+                                <td>${photoCell}</td>
+                                <td>${doctor.user.full_name}</td>
+                                <td>${doctor.user.email}</td>
+                                <td>${doctor.specialisation}</td>
+                                <td>${doctor.place_of_work}</td>
+                                <td>${doctor.phone || '-'}</td>
+                                <td class="table-actions">
+                                    <div class="btn-group-actions">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editDoctor(${doctor.id})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDoctor(${doctor.id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                } else {
+                    tbody.append('<tr><td colspan="8" class="text-center">Врачи не найдены</td></tr>');
+                }
+                
+                // Update pagination
+                updatePagination(response);
+                
+                // Update results info
+                updateResultsInfo(response);
+                
+                // Show/hide clear search button
+                if (currentSearch) {
+                    $('#clearSearchBtn').show();
+                } else {
+                    $('#clearSearchBtn').hide();
+                }
             })
             .fail(function() {
                 alert('Ошибка загрузки врачей');
             });
     }
+    
+    function updatePagination(response) {
+        const pagination = $('#pagination');
+        pagination.empty();
+        
+        if (response.pages <= 1) {
+            $('#paginationNav').hide();
+            return;
+        }
+        
+        $('#paginationNav').show();
+        
+        // Previous button
+        const prevDisabled = response.page === 1 ? 'disabled' : '';
+        pagination.append(`
+            <li class="page-item ${prevDisabled}">
+                <a class="page-link" href="#" onclick="goToPage(${response.page - 1}); return false;">Предыдущая</a>
+            </li>
+        `);
+        
+        // Page numbers
+        const startPage = Math.max(1, response.page - 2);
+        const endPage = Math.min(response.pages, response.page + 2);
+        
+        if (startPage > 1) {
+            pagination.append(`<li class="page-item"><a class="page-link" href="#" onclick="goToPage(1); return false;">1</a></li>`);
+            if (startPage > 2) {
+                pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const active = i === response.page ? 'active' : '';
+            pagination.append(`
+                <li class="page-item ${active}">
+                    <a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a>
+                </li>
+            `);
+        }
+        
+        if (endPage < response.pages) {
+            if (endPage < response.pages - 1) {
+                pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+            pagination.append(`<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${response.pages}); return false;">${response.pages}</a></li>`);
+        }
+        
+        // Next button
+        const nextDisabled = response.page === response.pages ? 'disabled' : '';
+        pagination.append(`
+            <li class="page-item ${nextDisabled}">
+                <a class="page-link" href="#" onclick="goToPage(${response.page + 1}); return false;">Следующая</a>
+            </li>
+        `);
+    }
+    
+    function updateResultsInfo(response) {
+        const start = response.total === 0 ? 0 : (response.page - 1) * response.per_page + 1;
+        const end = Math.min(response.page * response.per_page, response.total);
+        const info = `Показано ${start}-${end} из ${response.total} врачей`;
+        $('#resultsInfo').text(info);
+    }
+    
+    function goToPage(page) {
+        currentPage = page;
+        loadDoctors();
+        // Scroll to top of table
+        $('html, body').animate({
+            scrollTop: $('#doctorsTable').offset().top - 100
+        }, 300);
+    }
 
     function loadUsersForDoctor() {
         // Load both users and doctors to filter out users who are already doctors
         $.when(
-            $.get('/admin/api/users'),
-            $.get('/admin/api/doctors')
+            $.get('/admin/api/users', { per_page: 1000 }),
+            $.get('/admin/api/doctors', { per_page: 1000 })
         ).done(function(usersResponse, doctorsResponse) {
-            const users = usersResponse[0];
-            const doctors = doctorsResponse[0];
+            const users = usersResponse[0].items || usersResponse[0];
+            const doctors = doctorsResponse[0].items || doctorsResponse[0];
             
             // Get user IDs who are already doctors
             const doctorUserIds = doctors.map(doctor => doctor.user_id);
@@ -272,8 +424,10 @@
     }
 
     function editDoctor(doctorId) {
-        $.get('/admin/api/doctors')
-            .done(function(doctors) {
+        // Load all doctors to find the one we need
+        $.get('/admin/api/doctors', { per_page: 1000 })
+            .done(function(response) {
+                const doctors = response.items || response;
                 const doctor = doctors.find(d => d.id === doctorId);
                 if (doctor) {
                     $('#editDoctorId').val(doctor.id);
@@ -291,7 +445,12 @@
                     }
                     
                     $('#editDoctorModal').modal('show');
+                } else {
+                    alert('Врач не найден');
                 }
+            })
+            .fail(function() {
+                alert('Ошибка загрузки данных врача');
             });
     }
 

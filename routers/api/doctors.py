@@ -34,12 +34,14 @@ def search_doctors(user):
         # Search doctors by name if name query provided, otherwise get all doctors
         if name:
             doctors = search_doctors_by_name(name_query=name)
+            doctors_list = doctors
         else:
-            doctors = get_doctors()
+            result = get_doctors()
+            doctors_list = result['items'] if isinstance(result, dict) else result
 
         # Convert doctors to JSON-serializable format
         doctors_data = []
-        for doctor in doctors:
+        for doctor in doctors_list:
             doctor_data = {
                 'id': doctor.id,
                 'user_id': doctor.user_id,

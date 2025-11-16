@@ -12,6 +12,23 @@
 
 <div class="card">
     <div class="card-body">
+        <!-- Search Bar -->
+        <div class="mb-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Поиск по имени или email...">
+                        <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                            <i class="fas fa-search"></i> Поиск
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Очистить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="table-responsive">
             <table class="table table-striped table-hover" id="usersTable">
                 <thead>
@@ -28,6 +45,16 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" id="paginationNav" style="display: none;">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+        
+        <!-- Results info -->
+        <div class="text-center text-muted mt-2" id="resultsInfo"></div>
     </div>
 </div>
 
@@ -99,6 +126,11 @@
 
 {% block scripts %}
 <script>
+// Global state
+let currentPage = 1;
+let currentSearch = '';
+const perPage = 10;
+
 $(document).ready(function() {
     loadUsers();
     
@@ -113,43 +145,163 @@ $(document).ready(function() {
         e.preventDefault();
         updateUser();
     });
+    
+    // Search functionality
+    $('#searchBtn').on('click', function() {
+        currentSearch = $('#searchInput').val().trim();
+        currentPage = 1;
+        loadUsers();
+    });
+    
+    // Clear search
+    $('#clearSearchBtn').on('click', function() {
+        $('#searchInput').val('');
+        currentSearch = '';
+        currentPage = 1;
+        loadUsers();
+    });
+    
+    // Search on Enter key
+    $('#searchInput').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            $('#searchBtn').click();
+        }
+    });
 });
 
 function loadUsers() {
-    $.get('/admin/api/users')
-        .done(function(users) {
+    const params = {
+        page: currentPage,
+        per_page: perPage
+    };
+    
+    if (currentSearch) {
+        params.search = currentSearch;
+    }
+    
+    $.get('/admin/api/users', params)
+        .done(function(response) {
             const tbody = $('#usersTable tbody');
             tbody.empty();
             
-            users.forEach(function(user) {
-                const row = `
-                    <tr>
-                        <td>${user.id}</td>
-                        <td>${user.full_name}</td>
-                        <td>${user.email}</td>
-                        <td>
-                            <span class="badge ${user.is_guest ? 'bg-warning' : 'bg-success'}">
-                                ${user.is_guest ? 'Гость' : 'Зарегистрированный'}
-                            </span>
-                        </td>
-                        <td class="table-actions">
-                            <div class="btn-group-actions">
-                                <button class="btn btn-sm btn-outline-primary" onclick="editUser(${user.id})">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                tbody.append(row);
-            });
+            if (response.items && response.items.length > 0) {
+                response.items.forEach(function(user) {
+                    const row = `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.full_name}</td>
+                            <td>${user.email}</td>
+                            <td>
+                                <span class="badge ${user.is_guest ? 'bg-warning' : 'bg-success'}">
+                                    ${user.is_guest ? 'Гость' : 'Зарегистрированный'}
+                                </span>
+                            </td>
+                            <td class="table-actions">
+                                <div class="btn-group-actions">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editUser(${user.id})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            } else {
+                tbody.append('<tr><td colspan="5" class="text-center">Пользователи не найдены</td></tr>');
+            }
+            
+            // Update pagination
+            updatePagination(response);
+            
+            // Update results info
+            updateResultsInfo(response);
+            
+            // Show/hide clear search button
+            if (currentSearch) {
+                $('#clearSearchBtn').show();
+            } else {
+                $('#clearSearchBtn').hide();
+            }
         })
         .fail(function() {
             alert('Ошибка загрузки пользователей');
         });
+}
+
+function updatePagination(response) {
+    const pagination = $('#pagination');
+    pagination.empty();
+    
+    if (response.pages <= 1) {
+        $('#paginationNav').hide();
+        return;
+    }
+    
+    $('#paginationNav').show();
+    
+    // Previous button
+    const prevDisabled = response.page === 1 ? 'disabled' : '';
+    pagination.append(`
+        <li class="page-item ${prevDisabled}">
+            <a class="page-link" href="#" onclick="goToPage(${response.page - 1}); return false;">Предыдущая</a>
+        </li>
+    `);
+    
+    // Page numbers
+    const startPage = Math.max(1, response.page - 2);
+    const endPage = Math.min(response.pages, response.page + 2);
+    
+    if (startPage > 1) {
+        pagination.append(`<li class="page-item"><a class="page-link" href="#" onclick="goToPage(1); return false;">1</a></li>`);
+        if (startPage > 2) {
+            pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const active = i === response.page ? 'active' : '';
+        pagination.append(`
+            <li class="page-item ${active}">
+                <a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a>
+            </li>
+        `);
+    }
+    
+    if (endPage < response.pages) {
+        if (endPage < response.pages - 1) {
+            pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+        }
+        pagination.append(`<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${response.pages}); return false;">${response.pages}</a></li>`);
+    }
+    
+    // Next button
+    const nextDisabled = response.page === response.pages ? 'disabled' : '';
+    pagination.append(`
+        <li class="page-item ${nextDisabled}">
+            <a class="page-link" href="#" onclick="goToPage(${response.page + 1}); return false;">Следующая</a>
+        </li>
+    `);
+}
+
+function updateResultsInfo(response) {
+    const start = response.total === 0 ? 0 : (response.page - 1) * response.per_page + 1;
+    const end = Math.min(response.page * response.per_page, response.total);
+    const info = `Показано ${start}-${end} из ${response.total} пользователей`;
+    $('#resultsInfo').text(info);
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadUsers();
+    // Scroll to top of table
+    $('html, body').animate({
+        scrollTop: $('#usersTable').offset().top - 100
+    }, 300);
 }
 
 function addUser() {
@@ -178,16 +330,22 @@ function addUser() {
 }
 
 function editUser(userId) {
-    $.get('/admin/api/users')
-        .done(function(users) {
-            const user = users.find(u => u.id === userId);
+    // Load all users to find the one we need (we need to search through all pages)
+    $.get('/admin/api/users', { per_page: 1000 })
+        .done(function(response) {
+            const user = response.items.find(u => u.id === userId);
             if (user) {
                 $('#editUserId').val(user.id);
                 $('#editFullName').val(user.full_name);
                 $('#editEmail').val(user.email);
                 $('#editPassword').val('');
                 $('#editUserModal').modal('show');
+            } else {
+                alert('Пользователь не найден');
             }
+        })
+        .fail(function() {
+            alert('Ошибка загрузки данных пользователя');
         });
 }
 

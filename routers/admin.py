@@ -120,14 +120,30 @@ def uploaded_file(filename):
 @admin_required
 def api_get_users():
     from models.user.operations.get_users import get_users
-    users = get_users()
-    return jsonify([{
+    
+    # Get query parameters
+    search = request.args.get('search', '').strip() or None
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Get users with pagination
+    result = get_users(search=search, page=page, per_page=per_page)
+    
+    users_data = [{
         'id': user.id,
         'uuid': str(user.uuid),
         'full_name': user.full_name,
         'email': user.email,
         'is_guest': user.is_guest
-    } for user in users])
+    } for user in result['items']]
+    
+    return jsonify({
+        'items': users_data,
+        'total': result['total'],
+        'page': result['page'],
+        'per_page': result['per_page'],
+        'pages': result['pages']
+    })
 
 
 @admin.route('/api/users', methods=['POST'])
@@ -215,8 +231,16 @@ def api_delete_user(user_id):
 @admin_required
 def api_get_doctors():
     from models.doctor.operations.get_doctors import get_doctors
-    doctors = get_doctors()
-    return jsonify([{
+    
+    # Get query parameters
+    search = request.args.get('search', '').strip() or None
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Get doctors with pagination
+    result = get_doctors(search=search, page=page, per_page=per_page)
+    
+    doctors_data = [{
         'id': doctor.id,
         'user_id': doctor.user_id,
         'specialisation': doctor.specialisation,
@@ -228,7 +252,15 @@ def api_get_doctors():
             'full_name': doctor.user.full_name,
             'email': doctor.user.email
         }
-    } for doctor in doctors])
+    } for doctor in result['items']]
+    
+    return jsonify({
+        'items': doctors_data,
+        'total': result['total'],
+        'page': result['page'],
+        'per_page': result['per_page'],
+        'pages': result['pages']
+    })
 
 
 @admin.route('/api/doctors', methods=['POST'])
