@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 from models.patient.patient import Patient
 from models.doctor.doctor import Doctor
+from models.common.enums.patient_request_status import PatientRequestStatus
 from services.db.decorators.with_session import with_session
 
 
@@ -34,10 +35,11 @@ def create_patient(session: Session, user_id: int, doctor_id: int) -> Patient:
     if existing_patient:
         raise ValueError(f"Patient relationship already exists between user {user_id} and doctor {doctor_id}")
     
-    # Create new patient relationship
+    # Create new patient relationship with pending status
     patient = Patient(
         user_id=user_id,
-        doctor_id=doctor_id
+        doctor_id=doctor_id,
+        status=PatientRequestStatus.pending
     )
     
     session.add(patient)

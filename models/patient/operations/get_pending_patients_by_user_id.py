@@ -6,22 +6,23 @@ from services.db.decorators.with_session import with_session
 
 
 @with_session
-def get_patients_by_user_id(session: Session, user_id: int) -> list[Patient]:
+def get_pending_patients_by_user_id(session: Session, user_id: int) -> list[Patient]:
     """
-    Get all approved doctors for a specific user (patient).
-    Pending patients are filtered out - they are not considered active relationships.
+    Get all pending patient requests for a specific user (patient).
+    These are requests that the user has sent and are waiting for doctor approval.
     
     Args:
         session: Database session
         user_id: ID of the user (patient)
         
     Returns:
-        list[Patient]: List of approved patient relationships for the user
+        list[Patient]: List of pending patient relationships for the user
     """
     patients = session.query(Patient).options(
         joinedload(Patient.doctor).joinedload(Doctor.user)
     ).filter(
         Patient.user_id == user_id,
-        Patient.status == PatientRequestStatus.approved
+        Patient.status == PatientRequestStatus.pending
     ).all()
     return patients
+
