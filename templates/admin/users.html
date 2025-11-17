@@ -112,6 +112,12 @@
                     <div class="mb-3">
                         <label for="editPassword" class="form-label">Новый пароль (оставьте пустым, чтобы сохранить текущий)</label>
                         <input type="password" class="form-control" id="editPassword" name="password" minlength="8">
+                        <div class="invalid-feedback" id="editPasswordError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPasswordConfirmation" class="form-label">Подтвердите пароль</label>
+                        <input type="password" class="form-control" id="editPasswordConfirmation" name="password_confirmation" minlength="8">
+                        <div class="invalid-feedback" id="editPasswordConfirmationError"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -339,6 +345,12 @@ function editUser(userId) {
                 $('#editFullName').val(user.full_name);
                 $('#editEmail').val(user.email);
                 $('#editPassword').val('');
+                $('#editPasswordConfirmation').val('');
+                // Clear validation errors
+                $('#editPassword').removeClass('is-invalid');
+                $('#editPasswordConfirmation').removeClass('is-invalid');
+                $('#editPasswordError').text('');
+                $('#editPasswordConfirmationError').text('');
                 $('#editUserModal').modal('show');
             } else {
                 alert('Пользователь не найден');
@@ -351,13 +363,47 @@ function editUser(userId) {
 
 function updateUser() {
     const userId = $('#editUserId').val();
+    const password = $('#editPassword').val();
+    const passwordConfirmation = $('#editPasswordConfirmation').val();
+    
+    // Clear previous validation errors
+    $('#editPassword').removeClass('is-invalid');
+    $('#editPasswordConfirmation').removeClass('is-invalid');
+    $('#editPasswordError').text('');
+    $('#editPasswordConfirmationError').text('');
+    
+    // Validate password confirmation if password is provided
+    if (password) {
+        if (password.length < 8) {
+            $('#editPassword').addClass('is-invalid');
+            $('#editPasswordError').text('Пароль должен содержать минимум 8 символов');
+            return;
+        }
+        
+        if (!passwordConfirmation) {
+            $('#editPasswordConfirmation').addClass('is-invalid');
+            $('#editPasswordConfirmationError').text('Подтверждение пароля обязательно');
+            return;
+        }
+        
+        if (password !== passwordConfirmation) {
+            $('#editPasswordConfirmation').addClass('is-invalid');
+            $('#editPasswordConfirmationError').text('Пароли не совпадают');
+            return;
+        }
+    } else if (passwordConfirmation) {
+        // If password is empty but confirmation is provided, show error
+        $('#editPasswordConfirmation').addClass('is-invalid');
+        $('#editPasswordConfirmationError').text('Введите пароль для подтверждения');
+        return;
+    }
+    
     const formData = {
         full_name: $('#editFullName').val(),
         email: $('#editEmail').val()
     };
     
     // Only include password if provided
-    const password = $('#editPassword').val();
     if (password) {
         formData.password = password;
     }
