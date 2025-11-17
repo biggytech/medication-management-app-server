@@ -2,6 +2,65 @@
 
 {% block title %}Управление врачами - Админ-панель{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .user-search-container {
+        position: relative;
+    }
+    
+    .user-search-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ced4da;
+        border-top: none;
+        border-radius: 0 0 0.375rem 0.375rem;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .user-search-result-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s;
+    }
+    
+    .user-search-result-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .user-search-result-item:last-child {
+        border-bottom: none;
+    }
+    
+    .user-search-result-item.selected {
+        background-color: #e7f3ff;
+    }
+    
+    .user-search-result-item .user-name {
+        font-weight: 500;
+        color: #212529;
+    }
+    
+    .user-search-result-item .user-email {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .user-search-no-results {
+        padding: 1rem;
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Управление врачами</h1>
@@ -73,11 +132,34 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="addDoctorUserId" class="form-label">Выберите пользователя</label>
-                        <select class="form-control" id="addDoctorUserId" name="user_id" required>
-                            <option value="">Выберите пользователя...</option>
-                        </select>
+                        <div class="user-search-container">
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="addDoctorUserSearch" 
+                                   placeholder="Начните вводить имя или email пользователя..."
+                                   autocomplete="off">
+                            <input type="hidden" id="addDoctorUserId" name="user_id" required>
+                            <div class="user-search-dropdown" id="userSearchDropdown" style="display: none;">
+                                <div class="user-search-loading" id="userSearchLoading" style="display: none;">
+                                    <div class="text-center p-2">
+                                        <small class="text-muted">Поиск...</small>
+                                    </div>
+                                </div>
+                                <div class="user-search-results" id="userSearchResults"></div>
+                            </div>
+                        </div>
                         <div class="form-text" id="userSelectHelp">
                             Доступны только пользователи, которые еще не являются врачами
+                        </div>
+                        <div id="selectedUserDisplay" class="mt-2" style="display: none;">
+                            <div class="alert alert-info py-2 px-3 mb-0">
+                                <small>
+                                    <strong>Выбран:</strong> <span id="selectedUserName"></span>
+                                    <button type="button" class="btn btn-sm btn-link p-0 ms-2" id="clearSelectedUser">
+                                        <i class="fas fa-times"></i> Очистить
+                                    </button>
+                                </small>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -165,9 +247,14 @@
     let currentSearch = '';
     const perPage = 10;
 
+    // User search state
+    let userSearchTimeout = null;
+    let allDoctors = [];
+    let selectedUser = null;
+
     $(document).ready(function() {
         loadDoctors();
-        loadUsersForDoctor();
+        loadDoctorsForFiltering();
 
         // Add doctor form submission
         $('#addDoctorForm').on('submit', function(e) {
@@ -203,6 +290,9 @@
                 $('#searchBtn').click();
             }
         });
+
+        // User search functionality
+        setupUserSearch();
     });
 
     function loadDoctors() {
@@ -342,40 +432,165 @@
         }, 300);
     }
 
-    function loadUsersForDoctor() {
-        // Load both users and doctors to filter out users who are already doctors
-        $.when(
-            $.get('/admin/api/users', { per_page: 1000 }),
-            $.get('/admin/api/doctors', { per_page: 1000 })
-        ).done(function(usersResponse, doctorsResponse) {
-            const users = usersResponse[0].items || usersResponse[0];
-            const doctors = doctorsResponse[0].items || doctorsResponse[0];
-            
-            // Get user IDs who are already doctors
-            const doctorUserIds = doctors.map(doctor => doctor.user_id);
-            
-            const select = $('#addDoctorUserId');
-            select.empty();
-            select.append('<option value="">Выбрать пользователя...</option>');
+    function loadDoctorsForFiltering() {
+        // Load all doctors to filter out users who are already doctors
+        $.get('/admin/api/doctors', { per_page: 1000 })
+            .done(function(response) {
+                allDoctors = response.items || response;
+            })
+            .fail(function() {
+                console.error('Ошибка загрузки списка врачей');
+            });
+    }
 
-            // Filter out users who are already doctors
-            const availableUsers = users.filter(user => !doctorUserIds.includes(user.id));
+    function setupUserSearch() {
+        const searchInput = $('#addDoctorUserSearch');
+        const dropdown = $('#userSearchDropdown');
+        const resultsContainer = $('#userSearchResults');
+        const loadingIndicator = $('#userSearchLoading');
+        const hiddenInput = $('#addDoctorUserId');
+        const selectedDisplay = $('#selectedUserDisplay');
+        const selectedNameSpan = $('#selectedUserName');
+
+        // Handle input changes with debouncing
+        searchInput.on('input', function() {
+            const query = $(this).val().trim();
             
-            if (availableUsers.length === 0) {
-                select.append('<option value="" disabled>Нет доступных пользователей</option>');
-                select.prop('disabled', true);
-                $('#userSelectHelp').text('Все пользователи уже являются врачами').addClass('text-warning');
-                $('#addDoctorForm button[type="submit"]').prop('disabled', true);
-            } else {
-                availableUsers.forEach(function(user) {
-                    select.append(`<option value="${user.id}">${user.full_name} (${user.email})</option>`);
-                });
-                $('#userSelectHelp').text('Доступны только пользователи, которые еще не являются врачами').removeClass('text-warning');
-                $('#addDoctorForm button[type="submit"]').prop('disabled', false);
+            // Clear previous timeout
+            if (userSearchTimeout) {
+                clearTimeout(userSearchTimeout);
             }
-        }).fail(function() {
-            alert('Ошибка загрузки данных');
+
+            // If input is cleared, hide dropdown and clear selection
+            if (query === '') {
+                dropdown.hide();
+                return;
+            }
+
+            // Show loading indicator
+            loadingIndicator.show();
+            resultsContainer.hide();
+            dropdown.show();
+
+            // Debounce search (wait 300ms after user stops typing)
+            userSearchTimeout = setTimeout(function() {
+                searchUsers(query);
+            }, 300);
         });
+
+        // Handle focus
+        searchInput.on('focus', function() {
+            const query = $(this).val().trim();
+            if (query && !selectedUser) {
+                dropdown.show();
+            }
+        });
+
+        // Handle click outside to close dropdown
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.user-search-container').length) {
+                dropdown.hide();
+            }
+        });
+
+        // Handle clear selected user
+        $('#clearSelectedUser').on('click', function(e) {
+            e.preventDefault();
+            clearSelectedUser();
+        });
+
+        // Handle modal close - reset form
+        $('#addDoctorModal').on('hidden.bs.modal', function() {
+            clearSelectedUser();
+            searchInput.val('');
+            dropdown.hide();
+        });
+
+        function searchUsers(query) {
+            if (!query || query.length < 2) {
+                dropdown.hide();
+                return;
+            }
+
+            $.get('/admin/api/users', { search: query, per_page: 50 })
+                .done(function(response) {
+                    loadingIndicator.hide();
+                    const users = response.items || response;
+                    
+                    // Get user IDs who are already doctors
+                    const doctorUserIds = allDoctors.map(doctor => doctor.user_id);
+                    
+                    // Filter out users who are already doctors
+                    const availableUsers = users.filter(user => !doctorUserIds.includes(user.id));
+                    
+                    displayUserResults(availableUsers);
+                })
+                .fail(function() {
+                    loadingIndicator.hide();
+                    resultsContainer.html('<div class="user-search-no-results">Ошибка загрузки пользователей</div>');
+                    resultsContainer.show();
+                });
+        }
+
+        function displayUserResults(users) {
+            resultsContainer.empty();
+
+            if (users.length === 0) {
+                resultsContainer.html('<div class="user-search-no-results">Пользователи не найдены</div>');
+                resultsContainer.show();
+                return;
+            }
+
+            users.forEach(function(user) {
+                const item = $('<div class="user-search-result-item"></div>');
+                item.html(`
+                    <div class="user-name">${escapeHtml(user.full_name)}</div>
+                    <div class="user-email">${escapeHtml(user.email)}</div>
+                `);
+                
+                item.on('click', function() {
+                    selectUser(user);
+                });
+                
+                resultsContainer.append(item);
+            });
+
+            resultsContainer.show();
+        }
+
+        function selectUser(user) {
+            selectedUser = user;
+            hiddenInput.val(user.id);
+            searchInput.val(user.full_name);
+            selectedNameSpan.text(`${user.full_name} (${user.email})`);
+            selectedDisplay.show();
+            dropdown.hide();
+            
+            // Update help text
+            $('#userSelectHelp').text('Пользователь выбран').removeClass('text-warning');
+            $('#addDoctorForm button[type="submit"]').prop('disabled', false);
+        }
+
+        function clearSelectedUser() {
+            selectedUser = null;
+            hiddenInput.val('');
+            searchInput.val('');
+            selectedDisplay.hide();
+            dropdown.hide();
+            $('#userSelectHelp').text('Доступны только пользователи, которые еще не являются врачами').removeClass('text-warning');
+            $('#addDoctorForm button[type="submit"]').prop('disabled', false);
+        }
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 
     function addDoctor() {
@@ -412,8 +627,10 @@
             success: function() {
                 $('#addDoctorModal').modal('hide');
                 $('#addDoctorForm')[0].reset();
+                selectedUser = null;
+                $('#selectedUserDisplay').hide();
                 loadDoctors();
-                loadUsersForDoctor(); // Reload users list to update available options
+                loadDoctorsForFiltering(); // Reload doctors list to update available options
                 alert('Врач успешно добавлен');
             },
             error: function(xhr) {
@@ -498,7 +715,7 @@
                 method: 'DELETE',
                 success: function() {
                     loadDoctors();
-                    loadUsersForDoctor(); // Reload users list to make the user available again
+                    loadDoctorsForFiltering(); // Reload doctors list to make the user available again
                     alert('Врач успешно удален');
                 },
                 error: function(xhr) {

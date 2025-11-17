@@ -25,6 +25,7 @@
             white-space: nowrap;
         }
     </style>
+    {% block extra_styles %}{% endblock %}
 </head>
 <body>
     {% if session.admin_logged_in %}
