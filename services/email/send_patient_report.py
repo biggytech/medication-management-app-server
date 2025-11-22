@@ -159,7 +159,7 @@ class PatientReportEmailService:
                 subject=subject,
                 recipients=[doctor_email],
                 body=body,
-                sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@medicationapp.com')
+                sender=('Медика', current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@medicationapp.com'))
             )
 
             with open(pdf_file_path, 'rb') as pdf_file:
