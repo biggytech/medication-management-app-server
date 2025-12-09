@@ -6,6 +6,8 @@ from flask import Blueprint, request, render_template, redirect, url_for, sessio
     Response
 from werkzeug.utils import secure_filename
 
+from models.user.operations.get_user_by_id import get_user_by_id
+
 # Load environment variables
 load_dotenv()
 
@@ -120,15 +122,15 @@ def uploaded_file(filename):
 @admin_required
 def api_get_users():
     from models.user.operations.get_users import get_users
-    
+
     # Get query parameters
     search = request.args.get('search', '').strip() or None
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    
+
     # Get users with pagination
     result = get_users(search=search, page=page, per_page=per_page)
-    
+
     users_data = [{
         'id': user.id,
         'uuid': str(user.uuid),
@@ -136,7 +138,7 @@ def api_get_users():
         'email': user.email,
         'is_guest': user.is_guest
     } for user in result['items']]
-    
+
     return jsonify({
         'items': users_data,
         'total': result['total'],
@@ -219,8 +221,10 @@ def api_update_user(user_id):
 def api_delete_user(user_id):
     from models.user.operations.delete_user import delete_user
 
+    user = get_user_by_id(user_id)
+
     try:
-        delete_user(user_id)
+        delete_user(user)
         return jsonify({'message': 'User deleted successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -231,15 +235,15 @@ def api_delete_user(user_id):
 @admin_required
 def api_get_doctors():
     from models.doctor.operations.get_doctors import get_doctors
-    
+
     # Get query parameters
     search = request.args.get('search', '').strip() or None
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    
+
     # Get doctors with pagination
     result = get_doctors(search=search, page=page, per_page=per_page)
-    
+
     doctors_data = [{
         'id': doctor.id,
         'user_id': doctor.user_id,
@@ -253,7 +257,7 @@ def api_get_doctors():
             'email': doctor.user.email
         }
     } for doctor in result['items']]
-    
+
     return jsonify({
         'items': doctors_data,
         'total': result['total'],
