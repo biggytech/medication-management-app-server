@@ -33,7 +33,7 @@ def search_doctors(user):
         # Get search parameters
         # Search doctors by name if name query provided, otherwise get all doctors
         if name:
-            doctors = search_doctors_by_name(name_query=name)
+            doctors = search_doctors_by_name(name_query=name, exclude_user_id=user.id)
             doctors_list = doctors
         else:
             result = get_doctors()

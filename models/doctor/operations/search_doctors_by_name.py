@@ -7,13 +7,14 @@ from services.db.decorators.with_session import with_session
 
 
 @with_session
-def search_doctors_by_name(session, name_query):
+def search_doctors_by_name(session, name_query, exclude_user_id):
     """
     Search doctors by name using case-insensitive partial matching.
     
     Args:
         session: Database session
         name_query: Search query for doctor's full name
+        exclude_user_id
         
     Returns:
         List[Doctor]: List of doctor objects matching the search criteria
@@ -28,6 +29,11 @@ def search_doctors_by_name(session, name_query):
         search_term = f"%{name_query.strip()}%"
         stmt = stmt.where(
             func.lower(User.full_name).like(func.lower(search_term))
+        )
+
+    if exclude_user_id:
+        stmt = stmt.where(
+            User.id != exclude_user_id
         )
 
     doctors = session.scalars(stmt).all()
