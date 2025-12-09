@@ -1,5 +1,6 @@
 from werkzeug.security import generate_password_hash
 
+from models.user.operations.get_user_by_email import get_user_by_email
 from models.user.operations.get_user_by_id import get_user_by_id
 from models.user.user import User
 from services.db.decorators.with_session import with_session
@@ -7,12 +8,9 @@ from services.db.decorators.with_session import with_session
 
 @with_session
 def update_user(session, user, **user_data):
-    # TODO: check existing user
-    # existing_user = User.query.filter_by(email=user_data['email']).first()
-    # if existing_user:
-    #     return jsonify({'message': 'User already exists. Please login.'}), 400
-
-    # uuid = uuid4()
+    existing_user = get_user_by_email(user_data['email'])
+    if existing_user:
+        raise ValueError('Пользователь с таким email уже существует!')
 
     # Only hash password if it's being updated
     if 'password' in user_data and user_data['password']:

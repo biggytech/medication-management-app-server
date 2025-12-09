@@ -1,20 +1,22 @@
-from services.auth.generate_token import generate_token
 from uuid import uuid4
-from models.user.user import User
+
 from werkzeug.security import generate_password_hash
 
+from models.user.operations.get_user_by_email import get_user_by_email
+from models.user.user import User
+from services.auth.generate_token import generate_token
 from services.db.decorators.with_session import with_session
+
 
 @with_session
 def create_user(session, **user_data):
-    # TODO: check existing user
-    # existing_user = User.query.filter_by(email=user_data['email']).first()
-    # if existing_user:
-    #     return jsonify({'message': 'User already exists. Please login.'}), 400
+    existing_user = get_user_by_email(user_data['email'])
+    if existing_user:
+        raise ValueError('Пользователь с таким email уже существует!')
 
     uuid = uuid4()
 
-    hashed_password = generate_password_hash(user_data['password'], method="pbkdf2") # "pbkdf2" for MacOS
+    hashed_password = generate_password_hash(user_data['password'], method="pbkdf2")  # "pbkdf2" for MacOS
     user_data['password'] = hashed_password
 
     # Ensure is_guest has a default value if not provided
