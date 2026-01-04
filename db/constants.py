@@ -12,3 +12,12 @@ DB_CONNECTION_URL = URL.create(
     port=int(os.environ['DB_PORT']),
     database=os.environ['DB_DATABASE'],
 )
+
+ROOT_DB_CONNECTION_URL = URL.create(
+    os.environ['DB_DRIVER_NAME'],
+    username=os.environ['DB_USERNAME'],
+    password=os.environ['DB_PASSWORD'],
+    host=os.environ['DB_HOST'],
+    port=int(os.environ['DB_PORT']),
+    database='postgres',
+)

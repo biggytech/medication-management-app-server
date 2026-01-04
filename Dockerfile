@@ -1,5 +1,6 @@
 # Shared folder with venv built packages
 ARG VIRTUAL_ENV=/opt/venv
+ARG CACHE_DATE=04-01-2026
 
 # Build stage:
 FROM python:3.13.11-alpine AS build
@@ -8,7 +9,7 @@ ENV VIRTUAL_ENV=$VIRTUAL_ENV
 
 WORKDIR /app
 
-# Required for psycopg2 Python Library
+# Required for psycopg2 Python Library install
 RUN apk add postgresql17-dev
 
 # Enable venv
@@ -35,7 +36,6 @@ COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
 # Enabled venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-COPY ./.env.docker ./.env
 COPY ./db ./db
 COPY ./models ./models
 COPY ./routers ./routers
@@ -44,6 +44,7 @@ COPY ./templates ./templates
 COPY ./app.py ./app.py
 COPY ./DejaVuSerif-Bold.ttf ./DejaVuSerif-Bold.ttf
 COPY ./DejaVuSerif-Bold.ttf ./DejaVuSerif-Bold.ttf
+COPY ./init_db.py ./init_db.py
 
 EXPOSE 5001
 

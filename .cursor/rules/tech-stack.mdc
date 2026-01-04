@@ -48,7 +48,7 @@ pip install -r requirements.txt
 ```
 
 ### Database Setup
-- Use [db/scripts/create_db.py](mdc:db/scripts/create_db.py) for database creation
+- Use [init_db.py](mdc:init_db.py) for database creation
 - Use [db/scripts/drop_all_tables.py](mdc:db/scripts/drop_all_tables.py) for cleanup
 
 ## Project Structure Dependencies

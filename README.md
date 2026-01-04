@@ -13,17 +13,13 @@
     - create virtual environment: `python3 -m venv .venv`
     - activate the virtual environment: `source .venv/bin/activate`
     - install dependencies: `pip install -r requirements.txt`
-3. Create DB with `python db/create_db.py`
-4. Create cascade statements by running `db/migrations/add_delete_cascade_statements.sql`
-5. Start with `make dev`
+3. Start with `flask run --port=8000`
 
 ### Run from Docker
 
-1. Prepare `.env.docker` file by using env file example
-2. Build Docker image: `docker build . -t medication-management-app-server`
-    - Use this command when running in network issues during `apk add ...` runs:
-      `docker build --network host . -t medication-management-app-server`
-3. Run: `docker run -p 5001:5001 -it medication-management-app-server`
+1. Prepare `.env` file by using env file example
+2. `docker compose up`
+    - Rebuild: `docker builder prune && docker compose up --build`
 
 #### Production Mode
 

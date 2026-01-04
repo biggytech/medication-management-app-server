@@ -4,8 +4,12 @@ from dotenv import load_dotenv
 from flask import Flask, request, send_from_directory, Response
 from flask_mail import Mail
 
+from init_db import init_db
+
 # Load environment variables
 load_dotenv()
+
+init_db()
 
 from routers.admin import admin
 from routers.api.chat_messages import api_chat_messages
