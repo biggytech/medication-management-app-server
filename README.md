@@ -4,20 +4,24 @@
 
 - Python 3.13.3 or higher
 
-## Getting Started
+## Run the App
 
-1. Install dependencies from `requirements.txt`
+### Run locally
+
+1. Prepare `.env` file by using env file example
+2. Install dependencies from `requirements.txt`
     - create virtual environment: `python3 -m venv .venv`
     - activate the virtual environment: `source .venv/bin/activate`
     - install dependencies: `pip install -r requirements.txt`
-2. Create DB with `python db/create_db.py`
-3. Create cascade statements by running `db/migrations/add_delete_cascade_statements.sql`
-4. Start with `make dev`
+3. Create DB with `python db/create_db.py`
+4. Create cascade statements by running `db/migrations/add_delete_cascade_statements.sql`
+5. Start with `make dev`
 
-### Build from Docker
+### Run from Docker
 
-1. Build Docker image: `docker build . -t medication-management-app-server`
-2. Run: `docker run -p 5001:5001 -it medication-management-app-server`
+1. Prepare `.env` file by using env file example
+2. Build Docker image: `docker build . -t medication-management-app-server`
+3. Run: `docker run -p 5001:5001 -it medication-management-app-server`
 
 #### Production Mode
 
