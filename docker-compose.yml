@@ -2,8 +2,6 @@ version: '3'
 
 services:
   server:
-    build: ./
-    restart: always
     build:
       context: ./
       network: host # to fix fetches of 'apk add' commands
