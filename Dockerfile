@@ -28,6 +28,8 @@ ENV VIRTUAL_ENV=$VIRTUAL_ENV
 
 WORKDIR /app
 
+RUN apk add postgresql17-dev
+
 # Copy generated packages from the build stage:
 COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
 # Enabled venv

@@ -19,8 +19,10 @@
 
 ### Run from Docker
 
-1. Prepare `.env` file by using env file example
+1. Prepare `.env.docker` file by using env file example
 2. Build Docker image: `docker build . -t medication-management-app-server`
+    - Use this command when running in network issues during `apk add ...` runs:
+      `docker build --network host . -t medication-management-app-server`
 3. Run: `docker run -p 5001:5001 -it medication-management-app-server`
 
 #### Production Mode
