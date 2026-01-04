@@ -33,7 +33,7 @@ COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
 # Enabled venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-COPY ./.env ./.env
+COPY ./.env.docker ./.env
 COPY ./db ./db
 COPY ./models ./models
 COPY ./routers ./routers
