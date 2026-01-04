@@ -9,7 +9,7 @@ from services.db.decorators.with_session import with_session
 @with_session
 def update_user(session, user, **user_data):
     existing_user = get_user_by_email(user_data['email'])
-    if existing_user:
+    if existing_user and existing_user.id != user.id:
         raise ValueError('Пользователь с таким email уже существует!')
 
     # Only hash password if it's being updated
