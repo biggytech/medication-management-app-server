@@ -42,7 +42,7 @@ COPY ./routers ./routers
 COPY ./services ./services
 COPY ./templates ./templates
 COPY ./app.py ./app.py
-COPY ./DejaVuSerif-Bold.ttf ./DejaVuSerif-Bold.ttf
+COPY ./DejaVuSerif.ttf ./DejaVuSerif.ttf
 COPY ./DejaVuSerif-Bold.ttf ./DejaVuSerif-Bold.ttf
 COPY ./init_db.py ./init_db.py
 
