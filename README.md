@@ -18,8 +18,8 @@
 ### Run from Docker
 
 1. Prepare `.env` file by using env file example
-2. `docker compose up`
-    - Rebuild: `docker builder prune && docker compose up --build`
+2. `docker compose up -d`
+    - Rebuild: `docker builder prune && docker compose up --build -d`
 
 #### Production Mode
 
