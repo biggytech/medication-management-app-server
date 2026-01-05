@@ -5,6 +5,7 @@ services:
     build:
       context: ./
       network: host # to fix fetches of 'apk add' commands
+    #    restart: always
     ports:
       - '5001:5001'
     env_file: ".env"
