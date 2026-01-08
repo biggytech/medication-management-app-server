@@ -13,14 +13,14 @@ from models.user.operations.get_user_by_id import get_user_by_id
 from services.pdf.generate_patient_report import PatientReportGenerator
 
 
-def send_password_reset_report(email, password):
+def send_password_reset_report(email, code):
     body = f"""Был запрошен доступ на сброс вашего пароля.
 
-Ваш новый пароль {password}
+Код подтверждения {code}
     """
 
     msg = Message(
-        subject='Обновление пароля',
+        subject='Код подтверждения для сброса пароля',
         recipients=[email],
         body=body,
         sender=('Медика', current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@medicationapp.com'))
