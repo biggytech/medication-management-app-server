@@ -21,10 +21,6 @@
 2. `docker compose up -d`
     - Rebuild: `docker builder prune && docker compose up --build -d`
 
-#### Production Mode
-
-TODO: think of using this approach https://flask.palletsprojects.com/en/stable/tutorial/deploy/
-
 ## ENV FILE example
 
 ```
