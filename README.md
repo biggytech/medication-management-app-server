@@ -1,5 +1,9 @@
 # Medication Management App - Server
 
+This is server (API) for the mobile application.
+
+Mobile application repo: https://github.com/biggytech/medication-management-mobile-app
+
 ## Requirements
 
 - Python 3.13.3 or higher
